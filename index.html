@@ -319,13 +319,13 @@
         <!-- Trainer Tab -->
         <div id="tab-play" class="tab-content active">
             <div class="game-board">
-                <table class="paytable" id="paytable">
-                    <!-- Dynamic -->
-                </table>
-
                 <div class="cards-container" id="cards-container">
                     <!-- Dynamic cards -->
                 </div>
+
+                <table class="paytable" id="paytable">
+                    <!-- Dynamic -->
+                </table>
 
                 <div class="controls">
                     <div class="stat-card" style="min-width: 120px;">
@@ -534,9 +534,18 @@
                 
                 let feedbackHtml = `
                     <p style="margin-bottom:10px;">${isCorrect ? "You found the mathematically optimal hold." : "The Genie suggests a different hold."}</p>
-                    <div style="font-family:'JetBrains Mono'; font-size:0.9rem; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
-                        Best Hold: <span style="color:var(--primary)">${best.indices.length === 0 ? "NONE" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ')}</span> (EV: ${best.ev.toFixed(3)})<br>
-                        Your Hold: <span style="color:var(--text-muted)">${heldIndices.size === 0 ? "NONE" : Array.from(heldIndices).map(i => hand[i].rank + hand[i].suit).join(', ')}</span> (EV: ${userEv.toFixed(3)})
+                    <div style="font-family:'JetBrains Mono'; font-size:0.9rem; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; border:1px solid var(--border);">
+                        <div style="margin-bottom:10px;">
+                            <span style="color:var(--text-muted)">Best Hold:</span> <span style="color:var(--primary)">${best.indices.length === 0 ? "NONE" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ')}</span><br>
+                            <span style="color:var(--text-muted)">Your Hold:</span> <span style="color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">${heldIndices.size === 0 ? "NONE" : Array.from(heldIndices).map(i => hand[i].rank + hand[i].suit).join(', ')}</span>
+                        </div>
+                        <div style="border-top:1px solid var(--border); padding-top:10px; font-size:0.85rem;">
+                            <strong style="color:var(--secondary)">Why this hold?</strong><br>
+                            ${getIntuitiveExplanation(hand, best.indices)}
+                        </div>
+                        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); font-size:0.8rem; color:var(--text-muted);">
+                            <strong style="color:var(--success)">The Math:</strong> ${getMathExplanation(best.indices.length, best.ev)}
+                        </div>
                     </div>
                     <p style="margin-top:15px; font-weight:bold; color:var(--primary)">Final Hand: ${HAND_NAMES[finalResult]} (Paid ${win})</p>
                 `;
@@ -612,6 +621,59 @@
         function getPayout(handType, bet) {
             if (handType === 'NOTHING') return 0;
             return PAYTABLE[handType][bet - 1];
+        }
+
+        // --- Intuitive Explanations ---
+        function getIntuitiveExplanation(h, bestIdx) {
+            if (bestIdx.length === 5) return "You already have a winning hand that cannot be improved significantly by drawing.";
+            if (bestIdx.length === 0) return "No strong patterns found. Drawing 5 new cards maximizes your chance of hitting a high-value hand from scratch.";
+            
+            const heldCards = bestIdx.map(i => h[i]);
+            const type = evaluateHand(heldCards);
+            
+            if (type === 'ROYAL_FLUSH') return "You hit the jackpot! Never discard a Royal Flush.";
+            if (type === 'STRAIGHT_FLUSH' || type === 'FOUR_OF_A_KIND' || type === 'FULL_HOUSE') return "This is a high-value pat hand. Improvements are unlikely or impossible.";
+            
+            // Check for specific draws
+            const suits = {};
+            heldCards.forEach(c => suits[c.suit] = (suits[c.suit] || 0) + 1);
+            const isFlushDraw = Object.values(suits).some(s => s === 4);
+            if (isFlushDraw && bestIdx.length === 4) return "You are 1 card away from a Flush. The payout for a Flush is high enough to justify chasing the 9 remaining outs.";
+
+            const ranks = heldCards.map(c => RANK_VALUES[c.rank]).sort((a, b) => a - b);
+            const isStraightDraw = (bestIdx.length === 4 && (ranks[3] - ranks[0] === 3 || (ranks.includes(14) && ranks.includes(2))));
+            if (isStraightDraw) return "Holding 4 to a straight is strong, especially if it's an open-ended draw with 8 outs.";
+
+            if (bestIdx.length === 2 || bestIdx.length === 3) {
+                if (type === 'THREE_OF_A_KIND') return "A 3-of-a-kind is a strong foundation. Drawing 2 cards gives you a great chance at a Full House or 4-of-a-kind.";
+                const counts = {};
+                heldCards.forEach(c => counts[c.rank] = (counts[c.rank] || 0) + 1);
+                if (Object.values(counts).includes(2)) {
+                    const pairRank = Object.keys(counts).find(r => counts[r] === 2);
+                    if (RANK_VALUES[pairRank] >= 11) return "A high pair (Jacks or Better) guarantees your money back and has high potential for 3-of-a-kind.";
+                    return "A low pair is better than nothing, as it provides a path to 3-of-a-kind, Full House, or 4-of-a-kind.";
+                }
+            }
+
+            if (bestIdx.length === 3 && heldCards.some(c => RANK_VALUES[c.rank] >= 11)) {
+                const highCards = heldCards.filter(c => RANK_VALUES[c.rank] >= 11).length;
+                if (highCards >= 2) return "Holding multiple high cards (J, Q, K, A) maximizes your chances of hitting a Jacks or Better pair or better.";
+            }
+
+            return "This hold provides the highest statistical probability of a winning payout based on the remaining deck.";
+        }
+
+        function getMathExplanation(heldCount, ev) {
+            const remaining = 52 - 5;
+            let combos = 0;
+            const draw = 5 - heldCount;
+            if (draw === 1) combos = remaining;
+            else if (draw === 2) combos = (remaining * (remaining - 1)) / 2;
+            else if (draw === 3) combos = (remaining * (remaining - 1) * (remaining - 2)) / 6;
+            else if (draw === 4) combos = 178365; // C(47,4)
+            else if (draw === 5) combos = 1533939; // C(47,5)
+
+            return `Genie evaluated all ${combos.toLocaleString()} possible replacement outcomes for this hold. The total payout of all winning outcomes, divided by the total combinations, equals exactly ${ev.toFixed(4)} credits per coin.`;
         }
 
         // --- Solver Engine ---
