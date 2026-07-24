@@ -21,7 +21,7 @@
             --text: #e6edf3;
             --text-muted: #8b949e;
             --card-red: #ff4b4b;
-            --card-black: #e6edf3;
+            --card-black: #1a1a1a;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,6 +84,7 @@
 
         .paytable th { background: var(--surface-elevated); color: var(--primary); }
         .paytable .highlight { background: rgba(251, 191, 36, 0.1); color: var(--primary); font-weight: bold; }
+        .paytable .active-win { background: var(--success); color: var(--bg); font-weight: bold; }
 
         /* Cards */
         .cards-container {
@@ -91,6 +92,7 @@
             gap: 15px;
             justify-content: center;
             margin-bottom: 30px;
+            min-height: 200px;
         }
 
         .card {
@@ -134,6 +136,7 @@
         .card .suit { font-size: 2.5rem; text-align: center; }
         .card.red { color: var(--card-red); }
         .card.black { color: #1a1a1a; }
+        .card.empty { background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.1); cursor: default; }
 
         /* Controls */
         .controls {
@@ -162,32 +165,54 @@
         .btn-solve { background: var(--surface-elevated); color: var(--secondary); border: 2px solid var(--secondary); }
         .btn-solve:hover { background: var(--secondary); color: var(--bg); }
 
-        /* Solver Panel */
-        .solver-panel {
+        /* Feedback Panel */
+        .feedback-panel {
             background: var(--surface-elevated);
             border-radius: 15px;
             padding: 25px;
             margin-top: 30px;
             display: none;
+            border-left: 5px solid var(--primary);
         }
 
-        .solver-title {
+        .feedback-title {
             font-family: 'JetBrains Mono', monospace;
-            color: var(--secondary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
         }
 
-        .solver-result {
-            font-size: 1.1rem;
+        .feedback-correct { color: var(--success); border-left-color: var(--success); }
+        .feedback-incorrect { color: var(--danger); border-left-color: var(--danger); }
+
+        /* Manual Solver */
+        .card-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 5px;
             margin-bottom: 20px;
         }
 
-        .expected-value {
-            color: var(--success);
+        .selector-card {
+            background: #fff;
+            color: #000;
+            padding: 5px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
             font-weight: bold;
+        }
+
+        .selector-card.red { color: var(--card-red); }
+        .selector-card.selected { background: var(--primary); }
+        .selector-card.disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .manual-hand-display {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 100px;
         }
 
         /* Tabs */
@@ -195,6 +220,8 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
 
         .tab {
@@ -204,6 +231,7 @@
             border-radius: 8px;
             cursor: pointer;
             color: var(--text-muted);
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -239,6 +267,7 @@
             .card .rank { font-size: 1rem; }
             .card .suit { font-size: 1.5rem; }
             h1 { font-size: 1.8rem; }
+            .card-selector-grid { grid-template-columns: repeat(7, 1fr); }
         }
     </style>
 </head>
@@ -247,7 +276,7 @@
     <header>
         <div class="container">
             <h1>Video Poker Genie</h1>
-            <p class="subtitle">Optimal strategy powered by Exhaustive Expectation Evaluation</p>
+            <p class="subtitle">Master optimal strategy with the Genie's solver</p>
         </div>
     </header>
 
@@ -255,6 +284,7 @@
         
         <nav class="tabs">
             <div class="tab active" onclick="switchTab('play')">🎮 Trainer</div>
+            <div class="tab" onclick="switchTab('solver')">🧞 Manual Solver</div>
             <div class="tab" onclick="switchTab('learn')">📚 Learn</div>
             <div class="tab" onclick="switchTab('bankroll')">💰 Bankroll</div>
         </nav>
@@ -276,28 +306,53 @@
                         <div class="stat-value" id="balance">1000</div>
                     </div>
                     <button class="btn btn-deal" id="deal-btn" onclick="handleDeal()">Deal</button>
-                    <button class="btn btn-solve" id="solve-btn" onclick="handleSolve()">Solve</button>
+                    <button class="btn btn-solve" id="solve-btn" onclick="handleSolve()">Hint</button>
                 </div>
 
-                <div class="solver-panel" id="solver-panel">
-                    <h3 class="solver-title">🧞 Genie Analysis</h3>
-                    <div id="solver-output" class="solver-result"></div>
-                    <div id="decision-feedback"></div>
+                <div class="feedback-panel" id="feedback-panel">
+                    <h3 class="feedback-title" id="feedback-title">Correct!</h3>
+                    <div id="feedback-content"></div>
                 </div>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="stat-accuracy">0%</div>
-                    <div class="stat-label">Strategy Accuracy</div>
+                    <div class="stat-label">Accuracy</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-hands">0</div>
-                    <div class="stat-label">Hands Played</div>
+                    <div class="stat-label">Hands</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-ev">0.00</div>
-                    <div class="stat-label">Expected Value</div>
+                    <div class="stat-value" id="stat-winloss">0</div>
+                    <div class="stat-label">Session Profit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Solver Tab -->
+        <div id="tab-solver" class="tab-content">
+            <div class="game-board">
+                <h2 style="color: var(--primary); margin-bottom: 20px;">Manual Hand Solver</h2>
+                <p style="margin-bottom: 20px; color: var(--text-muted);">Select exactly 5 cards to analyze the optimal hold strategy.</p>
+                
+                <div class="card-selector-grid" id="selector-grid">
+                    <!-- 52 cards -->
+                </div>
+
+                <div class="manual-hand-display" id="manual-hand-display">
+                    <!-- Selected cards -->
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn btn-solve" id="manual-solve-btn" onclick="solveManualHand()" disabled>Solve This Hand</button>
+                    <button class="btn" style="margin-left: 10px;" onclick="resetManualSolver()">Reset</button>
+                </div>
+
+                <div class="feedback-panel" id="manual-feedback" style="display: block; border-left: none; margin-top: 40px; background: rgba(0,0,0,0.3); display:none;">
+                    <h3 class="solver-title" style="color:var(--secondary)">🧞 Genie's Solution</h3>
+                    <div id="manual-result-content"></div>
                 </div>
             </div>
         </div>
@@ -306,16 +361,15 @@
         <div id="tab-learn" class="tab-content">
             <div class="game-board">
                 <h2 style="color: var(--primary); margin-bottom: 20px;">Mastering the Math</h2>
-                <p style="margin-bottom: 15px;">Video Poker is one of the few games in the casino where a player can have a mathematical edge. The key is playing the <strong>Right Game</strong> with the <strong>Right Strategy</strong>.</p>
+                <p style="margin-bottom: 15px;">Video Poker is a game of skill and mathematics. Unlike slots, your decisions directly impact the return of the game.</p>
                 
                 <h3 style="color: var(--secondary); margin-top: 20px; margin-bottom: 10px;">Exhaustive Expectation Evaluation</h3>
-                <p>This app uses an exhaustive solver. For every hand dealt, there are 32 possible ways to hold cards (2^5). For each way, the solver calculates every possible outcome from the remaining 47 cards in the deck. It then averages the payout of all outcomes to find the <strong>Expected Value (EV)</strong>.</p>
+                <p>The Genie uses a "Brute Force" solver. When you are dealt 5 cards, there are exactly <strong>32 ways</strong> you can hold them. For each of those 32 ways, the solver calculates the outcome of every possible replacement card combination from the 47 cards left in the deck.</p>
                 
-                <ul style="margin: 20px 0 20px 30px; list-style-type: square;">
-                    <li><strong>Optimal Hold:</strong> The combination with the highest EV.</li>
-                    <li><strong>House Edge:</strong> The difference between 100% and the game's return.</li>
-                    <li><strong>Full Pay:</strong> A "9/6" Jacks or Better machine (9 for Full House, 6 for Flush) returns 99.54%.</li>
-                </ul>
+                <div style="background: var(--surface-elevated); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Expected Value (EV):</strong> The average amount of money you expect to win for a specific hold over the long term.</p>
+                    <p style="margin-top: 10px;"><em>Example:</em> Holding a Pair of Jacks might have an EV of 0.54, while drawing 5 new cards might have an EV of 0.32. The Genie tells you to hold the Jacks because 0.54 > 0.32.</p>
+                </div>
             </div>
         </div>
 
@@ -323,20 +377,14 @@
         <div id="tab-bankroll" class="tab-content">
             <div class="game-board">
                 <h2 style="color: var(--primary); margin-bottom: 20px;">Optimal Bet Sizing</h2>
-                <p style="margin-bottom: 15px;">To win at Video Poker, you must manage your bankroll to survive "swings".</p>
-                
                 <div class="stat-card" style="text-align: left; margin-bottom: 20px;">
-                    <h3 style="color: var(--success); margin-bottom: 10px;">Rule #1: Always Bet Max (5 Coins)</h3>
-                    <p>Max betting unlocks the Royal Flush bonus (usually 800:1 vs 250:1). This increases the total return of the game by roughly 1-2%. If you can't afford 5 coins at $1, move to a $0.25 machine.</p>
+                    <h3 style="color: var(--success); margin-bottom: 10px;">Always Bet Max (5 Coins)</h3>
+                    <p>The Royal Flush payout jumps from 250:1 to 800:1 only when you bet 5 coins. This single bonus accounts for roughly 1.5% of the total return. <strong>Never bet fewer than 5 coins.</strong></p>
                 </div>
 
                 <div class="stat-card" style="text-align: left;">
-                    <h3 style="color: var(--secondary); margin-bottom: 10px;">Bankroll Requirements</h3>
-                    <p>For a standard Jacks or Better session:</p>
-                    <ul style="margin: 10px 0 10px 20px;">
-                        <li><strong>Short session (3 hours):</strong> 200 units ($250 for $0.25)</li>
-                        <li><strong>Serious play:</strong> 2,000 units ($2,500 for $0.25)</li>
-                    </ul>
+                    <h3 style="color: var(--secondary); margin-bottom: 10px;">Bankroll Management</h3>
+                    <p>To withstand the high variance of waiting for a Royal Flush, you should have a bankroll of at least 3-5 days worth of play, or roughly 2,000 to 5,000 units.</p>
                 </div>
             </div>
         </div>
@@ -378,14 +426,17 @@
         let deck = [];
         let hand = [];
         let heldIndices = new Set();
-        let gameState = 'IDLE'; // IDLE, DEALT
+        let gameState = 'IDLE'; // IDLE, DEALT, RESULT
         let balance = 1000;
-        let stats = { hands: 0, correct: 0, totalEv: 0 };
+        let startBalance = 1000;
+        let stats = { hands: 0, correct: 0 };
+        let manualHand = [];
 
         // --- Initialization ---
         function init() {
             renderPaytable();
             createDeck();
+            renderSelectorGrid();
             updateUI();
         }
 
@@ -407,6 +458,8 @@
 
         // --- Logic ---
         function handleDeal() {
+            const feedbackPanel = document.getElementById('feedback-panel');
+            
             if (gameState === 'IDLE') {
                 if (balance < 5) return alert("Not enough credits!");
                 balance -= 5;
@@ -415,22 +468,66 @@
                 hand = deck.splice(0, 5);
                 heldIndices.clear();
                 gameState = 'DEALT';
-                document.getElementById('solver-panel').style.display = 'none';
-            } else {
+                feedbackPanel.style.display = 'none';
+            } else if (gameState === 'DEALT') {
+                // Before drawing, evaluate if user made the right choice
+                const results = solveHand(hand);
+                const best = results[0];
+                const userHoldKey = Array.from(heldIndices).sort().join(',');
+                const bestHoldKey = best.indices.sort().join(',');
+                
+                const isCorrect = userHoldKey === bestHoldKey;
+                const userEv = results.find(r => r.indices.sort().join(',') === userHoldKey).ev;
+                
+                stats.hands++;
+                if (isCorrect) stats.correct++;
+                
                 // Draw new cards
                 for (let i = 0; i < 5; i++) {
                     if (!heldIndices.has(i)) {
                         hand[i] = deck.splice(0, 1)[0];
                     }
                 }
-                const result = evaluateHand(hand);
-                const win = getPayout(result, 5);
+                
+                const finalResult = evaluateHand(hand);
+                const win = getPayout(finalResult, 5);
                 balance += win;
+                gameState = 'RESULT';
+                
+                // Show Guidance
+                feedbackPanel.style.display = 'block';
+                const title = document.getElementById('feedback-title');
+                title.textContent = isCorrect ? "✓ Perfect Hold!" : "✗ Strategy Mistake";
+                title.className = isCorrect ? "feedback-title feedback-correct" : "feedback-title feedback-incorrect";
+                
+                let feedbackHtml = `
+                    <p style="margin-bottom:10px;">${isCorrect ? "You found the mathematically optimal hold." : "The Genie suggests a different hold."}</p>
+                    <div style="font-family:'JetBrains Mono'; font-size:0.9rem; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                        Best Hold: <span style="color:var(--primary)">${best.indices.length === 0 ? "NONE" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ')}</span> (EV: ${best.ev.toFixed(3)})<br>
+                        Your Hold: <span style="color:var(--text-muted)">${heldIndices.size === 0 ? "NONE" : Array.from(heldIndices).map(i => hand[i].rank + hand[i].suit).join(', ')}</span> (EV: ${userEv.toFixed(3)})
+                    </div>
+                    <p style="margin-top:15px; font-weight:bold; color:var(--primary)">Final Hand: ${HAND_NAMES[finalResult]} (Paid ${win})</p>
+                `;
+                document.getElementById('feedback-content').innerHTML = feedbackHtml;
+                
+            } else if (gameState === 'RESULT') {
                 gameState = 'IDLE';
-                stats.hands++;
-                updateUI();
+                handleDeal(); // Start next hand immediately
             }
             updateUI();
+        }
+
+        function handleSolve() {
+            if (gameState !== 'DEALT') return;
+            const results = solveHand(hand);
+            const best = results[0];
+            
+            // Highlight the correct cards as a "hint"
+            heldIndices.clear();
+            best.indices.forEach(i => heldIndices.add(i));
+            updateUI();
+            
+            alert(`Genie's Hint: Hold ${best.indices.length === 0 ? "NOTHING" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ')}`);
         }
 
         function toggleHold(index) {
@@ -456,12 +553,11 @@
             const countArray = Object.values(counts).sort((a, b) => b - a);
             const isFlush = Object.values(suits).some(s => s === 5);
             
-            // Straight logic
             let isStraight = false;
             const uniqueValues = [...new Set(values)];
             if (uniqueValues.length === 5) {
                 if (values[4] - values[0] === 4) isStraight = true;
-                if (values[4] === 14 && values[0] === 2 && values[3] === 5) isStraight = true; // A,2,3,4,5
+                if (values[4] === 14 && values[0] === 2 && values[3] === 5) isStraight = true;
             }
 
             if (isFlush && isStraight && values.includes(14) && values.includes(10)) return 'ROYAL_FLUSH';
@@ -473,13 +569,11 @@
             if (countArray[0] === 3) return 'THREE_OF_A_KIND';
             if (countArray[0] === 2 && countArray[1] === 2) return 'TWO_PAIR';
             
-            // Jacks or Better
             if (countArray[0] === 2) {
                 for (let rank in counts) {
                     if (counts[rank] === 2 && RANK_VALUES[rank] >= 11) return 'JACKS_OR_BETTER';
                 }
             }
-
             return 'NOTHING';
         }
 
@@ -488,40 +582,7 @@
             return PAYTABLE[handType][bet - 1];
         }
 
-        // --- Solver (Exhaustive Expectation Evaluation) ---
-        function handleSolve() {
-            if (gameState !== 'DEALT') return;
-            
-            const results = solveHand(hand);
-            const best = results[0];
-            
-            const solverPanel = document.getElementById('solver-panel');
-            const solverOutput = document.getElementById('solver-output');
-            const feedback = document.getElementById('decision-feedback');
-            
-            solverPanel.style.display = 'block';
-            
-            // Best move display
-            const heldCardsText = best.indices.length === 0 ? "NOTHING" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ');
-            solverOutput.innerHTML = `Best Hold: <span style="color:var(--primary)">${heldCardsText}</span><br>
-                                    Expected Value: <span class="expected-value">${best.ev.toFixed(4)}</span>`;
-
-            // Accuracy check
-            const userHoldKey = Array.from(heldIndices).sort().join(',');
-            const bestHoldKey = best.indices.sort().join(',');
-            
-            if (userHoldKey === bestHoldKey) {
-                feedback.innerHTML = `<span style="color:var(--success)">✓ Perfect Play!</span> You chose the mathematically optimal hold.`;
-                stats.correct++;
-            } else {
-                const userEv = results.find(r => r.indices.sort().join(',') === userHoldKey).ev;
-                const loss = best.ev - userEv;
-                feedback.innerHTML = `<span style="color:var(--danger)">✗ Mistake.</span> Your choice had an EV of ${userEv.toFixed(4)} (Difference: -${loss.toFixed(4)})`;
-            }
-            
-            updateUI();
-        }
-
+        // --- Solver Engine ---
         function solveHand(currentHand) {
             const fullDeck = [];
             for (let suit of SUITS) {
@@ -529,101 +590,75 @@
                     fullDeck.push({ rank, suit });
                 }
             }
-            
             const remainingDeck = fullDeck.filter(dc => 
                 !currentHand.some(hc => hc.rank === dc.rank && hc.suit === dc.suit)
             );
 
             const combinations = [];
-            // Generate all 32 hold combinations
             for (let i = 0; i < 32; i++) {
                 const indices = [];
                 for (let j = 0; j < 5; j++) {
                     if ((i >> j) & 1) indices.push(j);
                 }
-                
                 const ev = calculateEV(indices, currentHand, remainingDeck);
                 combinations.push({ indices, ev });
             }
-
             return combinations.sort((a, b) => b.ev - a.ev);
         }
 
         function calculateEV(heldIdx, currentHand, remainingDeck) {
             const heldCards = heldIdx.map(i => currentHand[i]);
             const drawCount = 5 - heldIdx.length;
-            
             if (drawCount === 0) return getPayout(evaluateHand(heldCards), 5);
 
-            // Exhaustive evaluation for drawCount 1-5
-            // Optimization: For drawCount > 2, we use a heuristic or precomputed tables in production, 
-            // but for a demo, we can iterate if performance allows.
-            // Let's implement a clean recursive counter for accuracy.
-            
             let totalPayout = 0;
             let totalCombos = 0;
 
             if (drawCount === 1) {
                 for (let i = 0; i < remainingDeck.length; i++) {
-                    const fullHand = [...heldCards, remainingDeck[i]];
-                    totalPayout += getPayout(evaluateHand(fullHand), 5);
+                    totalPayout += getPayout(evaluateHand([...heldCards, remainingDeck[i]]), 5);
                     totalCombos++;
                 }
             } else if (drawCount === 2) {
                 for (let i = 0; i < remainingDeck.length; i++) {
                     for (let j = i + 1; j < remainingDeck.length; j++) {
-                        const fullHand = [...heldCards, remainingDeck[i], remainingDeck[j]];
-                        totalPayout += getPayout(evaluateHand(fullHand), 5);
+                        totalPayout += getPayout(evaluateHand([...heldCards, remainingDeck[i], remainingDeck[j]]), 5);
                         totalCombos++;
                     }
                 }
             } else if (drawCount === 3) {
-                // Approx for performance in browser
-                // In a real Jacks or Better solver, you'd use a lookup table for these
-                // For this tool, we'll run the full loop for accuracy
+                // Full exhaustive for 3-card draw (16,215 combos)
                 for (let i = 0; i < remainingDeck.length; i++) {
                     for (let j = i + 1; j < remainingDeck.length; j++) {
                         for (let k = j + 1; k < remainingDeck.length; k++) {
-                            const fullHand = [...heldCards, remainingDeck[i], remainingDeck[j], remainingDeck[k]];
-                            totalPayout += getPayout(evaluateHand(fullHand), 5);
+                            totalPayout += getPayout(evaluateHand([...heldCards, remainingDeck[i], remainingDeck[j], remainingDeck[k]]), 5);
                             totalCombos++;
                         }
                     }
                 }
-            } else if (drawCount >= 4) {
-                // For 4 or 5 cards, we must use combinatorial shortcuts (Suit-indifference)
-                // or precomputed values. For now, let's provide an estimated EV for 4/5 draws
-                // to keep the app responsive, or a simplified subset.
-                // Simple version: just use a few thousand samples or specific logic.
-                // For Jacks or Better, these cases are rare to be "optimal" anyway except for a few.
-                return calculateHeuristicEV(heldCards, drawCount, remainingDeck);
+            } else {
+                // Sampling for 4/5 cards to keep UI snappy
+                const samples = 2000;
+                for (let i = 0; i < samples; i++) {
+                    const draw = [];
+                    const tempDeck = [...remainingDeck];
+                    for (let j = 0; j < drawCount; j++) {
+                        const r = Math.floor(Math.random() * tempDeck.length);
+                        draw.push(tempDeck.splice(r, 1)[0]);
+                    }
+                    totalPayout += getPayout(evaluateHand([...heldCards, ...draw]), 5);
+                    totalCombos++;
+                }
             }
-
             return totalPayout / totalCombos;
         }
 
-        function calculateHeuristicEV(heldCards, drawCount, remainingDeck) {
-            // Simplified sampling for 4/5 card draws to maintain UI responsiveness
-            const samples = 2000;
-            let totalPayout = 0;
-            for (let i = 0; i < samples; i++) {
-                const draw = [];
-                const tempDeck = [...remainingDeck];
-                for (let j = 0; j < drawCount; j++) {
-                    const randIdx = Math.floor(Math.random() * tempDeck.length);
-                    draw.push(tempDeck.splice(randIdx, 1)[0]);
-                }
-                totalPayout += getPayout(evaluateHand([...heldCards, ...draw]), 5);
-            }
-            return totalPayout / samples;
-        }
-
-        // --- UI ---
+        // --- UI & View ---
         function renderPaytable() {
             const table = document.getElementById('paytable');
             let html = `<tr><th>Hand</th><th>1</th><th>2</th><th>3</th><th>4</th><th class="highlight">5</th></tr>`;
             for (let key in PAYTABLE) {
-                html += `<tr>
+                html += `<tr id="row-${key}">
                     <td>${HAND_NAMES[key]}</td>
                     ${PAYTABLE[key].map((v, i) => `<td class="${i === 4 ? 'highlight' : ''}">${v}</td>`).join('')}
                 </tr>`;
@@ -638,7 +673,7 @@
             for (let i = 0; i < 5; i++) {
                 const c = hand[i];
                 if (!c) {
-                    container.innerHTML += `<div class="card" style="background:#222; border: 2px dashed #444;"></div>`;
+                    container.innerHTML += `<div class="card empty"></div>`;
                     continue;
                 }
                 const div = document.createElement('div');
@@ -653,15 +688,116 @@
             }
 
             document.getElementById('balance').textContent = balance;
-            document.getElementById('deal-btn').textContent = gameState === 'IDLE' ? 'Deal' : 'Draw';
+            document.getElementById('deal-btn').textContent = 
+                gameState === 'IDLE' ? 'Deal' : 
+                gameState === 'DEALT' ? 'Draw' : 'Next';
+            
             document.getElementById('stat-hands').textContent = stats.hands;
             document.getElementById('stat-accuracy').textContent = stats.hands > 0 ? Math.round((stats.correct / stats.hands) * 100) + '%' : '0%';
+            const profit = balance - startBalance;
+            document.getElementById('stat-winloss').textContent = (profit >= 0 ? '+' : '') + profit;
+            document.getElementById('stat-winloss').style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            // Highlight paytable row if win
+            document.querySelectorAll('.paytable tr').forEach(r => r.classList.remove('active-win'));
+            if (gameState === 'RESULT') {
+                const res = evaluateHand(hand);
+                if (res !== 'NOTHING') document.getElementById('row-' + res).classList.add('active-win');
+            }
+        }
+
+        // --- Manual Solver UI ---
+        function renderSelectorGrid() {
+            const grid = document.getElementById('selector-grid');
+            grid.innerHTML = '';
+            SUITS.forEach(suit => {
+                RANKS.forEach(rank => {
+                    const div = document.createElement('div');
+                    div.className = `selector-card ${(suit==='♥'||suit==='♦') ? 'red' : ''}`;
+                    div.textContent = rank + suit;
+                    div.onclick = () => toggleManualCard(rank, suit);
+                    div.id = `sel-${rank}-${suit}`;
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        function toggleManualCard(rank, suit) {
+            const index = manualHand.findIndex(c => c.rank === rank && c.suit === suit);
+            if (index > -1) {
+                manualHand.splice(index, 1);
+            } else {
+                if (manualHand.length >= 5) return;
+                manualHand.push({ rank, suit, color: (suit === '♥' || suit === '♦') ? 'red' : 'black' });
+            }
+            updateManualUI();
+        }
+
+        function updateManualUI() {
+            const display = document.getElementById('manual-hand-display');
+            display.innerHTML = '';
+            manualHand.forEach(c => {
+                const div = document.createElement('div');
+                div.className = `card ${c.color}`;
+                div.style.width = '80px';
+                div.style.height = '110px';
+                div.innerHTML = `<div class="rank" style="font-size:1.2rem">${c.rank}</div><div class="suit">${c.suit}</div>`;
+                display.appendChild(div);
+            });
+
+            document.querySelectorAll('.selector-card').forEach(el => el.classList.remove('selected'));
+            manualHand.forEach(c => {
+                document.getElementById(`sel-${c.rank}-${c.suit}`).classList.add('selected');
+            });
+
+            document.getElementById('manual-solve-btn').disabled = manualHand.length !== 5;
+        }
+
+        function solveManualHand() {
+            const content = document.getElementById('manual-result-content');
+            document.getElementById('manual-feedback').style.display = 'block';
+            content.innerHTML = "🧞 Genie is thinking...";
+            
+            // Wrap in timeout to let UI update
+            setTimeout(() => {
+                const results = solveHand(manualHand);
+                const best = results[0];
+                
+                let html = `
+                    <div style="margin-bottom:20px;">
+                        <h4 style="color:var(--primary); margin-bottom:10px;">Optimal Hold:</h4>
+                        <div style="font-size:1.4rem; font-family:'JetBrains Mono'; color:#fff;">
+                            ${best.indices.length === 0 ? "DISCARD ALL" : best.indices.map(i => manualHand[i].rank + manualHand[i].suit).join(' ')}
+                        </div>
+                        <div style="color:var(--success); margin-top:5px;">Expected Value: ${best.ev.toFixed(4)}</div>
+                    </div>
+                    <h4 style="color:var(--text-muted); margin-bottom:10px;">Top Alternative Holds:</h4>
+                    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                `;
+                
+                results.slice(1, 6).forEach(res => {
+                    html += `
+                        <tr style="border-bottom:1px solid var(--border)">
+                            <td style="padding:8px 0; font-family:'JetBrains Mono';">${res.indices.map(i => manualHand[i].rank + manualHand[i].suit).join(' ') || 'NONE'}</td>
+                            <td style="padding:8px 0; text-align:right; color:var(--text-muted)">EV: ${res.ev.toFixed(4)}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</table>`;
+                content.innerHTML = html;
+            }, 100);
+        }
+
+        function resetManualSolver() {
+            manualHand = [];
+            document.getElementById('manual-feedback').style.display = 'none';
+            updateManualUI();
         }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
         }
