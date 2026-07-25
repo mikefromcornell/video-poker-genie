@@ -311,6 +311,7 @@
         
         <nav class="tabs">
             <div class="tab active" onclick="switchTab('play')">🎮 Trainer</div>
+            <div class="tab" onclick="switchTab('paytable')">📜 Paytable</div>
             <div class="tab" onclick="switchTab('solver')">🧞 Manual Solver</div>
             <div class="tab" onclick="switchTab('learn')">📚 Learn</div>
             <div class="tab" onclick="switchTab('bankroll')">💰 Bankroll</div>
@@ -322,10 +323,6 @@
                 <div class="cards-container" id="cards-container">
                     <!-- Dynamic cards -->
                 </div>
-
-                <table class="paytable" id="paytable">
-                    <!-- Dynamic -->
-                </table>
 
                 <div class="controls">
                     <div class="stat-card" style="min-width: 120px;">
@@ -355,6 +352,19 @@
                     <div class="stat-value" id="stat-winloss">0</div>
                     <div class="stat-label">Session Profit</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Paytable Tab -->
+        <div id="tab-paytable" class="tab-content">
+            <div class="game-board">
+                <h2 style="color: var(--primary); margin-bottom: 20px; text-align: center;">9/6 Jacks or Better Paytable</h2>
+                <table class="paytable" id="paytable">
+                    <!-- Dynamic -->
+                </table>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 20px; text-align: center;">
+                    * 5 coins unlocks the bonus Royal Flush payout (800:1).
+                </p>
             </div>
         </div>
 
