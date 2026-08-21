@@ -6,62 +6,71 @@
     <title>Video Poker Genie — Master the Machine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
     <style>
         :root {
             --bg: #0a0e14;
             --surface: #151b23;
             --surface-elevated: #1d242f;
+            --surface-hover: #262f3d;
             --border: #30363d;
+            --border-highlight: #485361;
             --primary: #fbbf24;
+            --primary-glow: rgba(251, 191, 36, 0.25);
             --secondary: #38bdf8;
+            --secondary-glow: rgba(56, 189, 248, 0.25);
             --success: #4ade80;
+            --success-glow: rgba(74, 222, 128, 0.2);
             --danger: #f87171;
+            --danger-glow: rgba(248, 113, 113, 0.2);
             --text: #e6edf3;
             --text-muted: #8b949e;
+            --text-bright: #ffffff;
             --card-red: #ff4b4b;
             --card-black: #1a1a1a;
+            --accent-purple: #c084fc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1140px; margin: 0 auto; padding: 20px; }
 
         header {
             text-align: center;
-            padding: 40px 0;
+            padding: 35px 0 25px 0;
             background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
             border-bottom: 1px solid var(--border);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         h1 {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 3rem;
+            font-size: 2.8rem;
             color: var(--primary);
             text-transform: uppercase;
             letter-spacing: -1px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            margin-bottom: 8px;
+            text-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
         }
 
-        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .subtitle { color: var(--text-muted); font-size: 1.05rem; }
 
         /* Game Board */
         .game-board {
             background: var(--surface);
-            border: 4px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         /* Paytable */
@@ -70,21 +79,21 @@
             border-collapse: collapse;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
-            margin-bottom: 30px;
-            background: rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.25);
             border-radius: 8px;
             overflow: hidden;
         }
 
         .paytable th, .paytable td {
-            padding: 8px 12px;
+            padding: 9px 12px;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
 
-        .paytable th { background: var(--surface-elevated); color: var(--primary); }
-        .paytable .highlight { background: rgba(251, 191, 36, 0.1); color: var(--primary); font-weight: bold; }
-        .paytable .active-win { background: var(--success); color: var(--bg); font-weight: bold; }
+        .paytable th { background: var(--surface-elevated); color: var(--primary); font-weight: 600; }
+        .paytable .highlight { background: rgba(251, 191, 36, 0.12); color: var(--primary); font-weight: bold; }
+        .paytable .active-win { background: var(--success) !important; color: var(--bg) !important; font-weight: bold; }
 
         /* Cards */
         .cards-container {
@@ -92,7 +101,8 @@
             gap: 15px;
             justify-content: center;
             margin-bottom: 30px;
-            min-height: 200px;
+            min-height: 180px;
+            flex-wrap: wrap;
         }
 
         .card {
@@ -105,80 +115,105 @@
             justify-content: space-between;
             padding: 10px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             user-select: none;
             position: relative;
             border: 4px solid transparent;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
         }
 
         .card.selected {
-            transform: translateY(-20px);
+            transform: translateY(-16px);
             border-color: var(--primary);
-            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.4);
+            box-shadow: 0 12px 24px rgba(251, 191, 36, 0.4);
         }
 
         .card.held::after {
             content: 'HELD';
             position: absolute;
-            top: -30px;
+            top: -26px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--primary);
             color: var(--bg);
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 4px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: bold;
-            font-size: 0.8rem;
+            font-weight: 800;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
 
-        .card .rank { font-size: 1.8rem; font-weight: bold; line-height: 1; }
-        .card .suit { font-size: 2.5rem; text-align: center; }
+        .card .rank { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+        .card .suit { font-size: 2.4rem; text-align: center; line-height: 1; }
         .card.red { color: var(--card-red); }
         .card.black { color: #1a1a1a; }
-        .card.empty { background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.1); cursor: default; }
+        .card.empty { background: rgba(255,255,255,0.03); border: 2px dashed rgba(255,255,255,0.1); cursor: default; }
 
         /* Controls */
         .controls {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 15px 40px;
+            padding: 12px 28px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: bold;
-            font-size: 1.2rem;
+            font-weight: 700;
+            font-size: 1rem;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
         }
 
-        .btn-deal { background: var(--primary); color: var(--bg); }
-        .btn-deal:hover { transform: scale(1.05); filter: brightness(1.1); }
-        .btn-deal:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-deal { background: var(--primary); color: var(--bg); box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); }
+        .btn-deal:hover { background: #f59e0b; box-shadow: 0 6px 20px rgba(251, 191, 36, 0.45); }
+        .btn-deal:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .btn-solve { background: var(--surface-elevated); color: var(--secondary); border: 2px solid var(--secondary); }
         .btn-solve:hover { background: var(--secondary); color: var(--bg); }
 
+        .btn-secondary-action {
+            background: var(--surface-elevated);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            padding: 10px 18px;
+        }
+        .btn-secondary-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         /* Feedback Panel */
         .feedback-panel {
             background: var(--surface-elevated);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
+            border-radius: 12px;
+            padding: 22px;
+            margin-top: 25px;
             display: none;
             border-left: 5px solid var(--primary);
         }
 
         .feedback-title {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .feedback-correct { color: var(--success); border-left-color: var(--success); }
@@ -188,9 +223,9 @@
         .card-selector-grid {
             display: grid;
             grid-template-columns: repeat(13, 1fr);
-            gap: 8px;
-            margin-bottom: 30px;
-            background: rgba(0,0,0,0.2);
+            gap: 6px;
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.25);
             padding: 15px;
             border-radius: 12px;
         }
@@ -198,40 +233,42 @@
         .selector-card {
             background: #fff;
             color: #000;
-            height: 45px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            transition: all 0.1s;
+            transition: all 0.15s;
             border: 2px solid transparent;
             font-family: 'JetBrains Mono', monospace;
+            user-select: none;
         }
 
         .selector-card.red { color: var(--card-red); }
-        .selector-card:hover { transform: scale(1.1); z-index: 5; }
+        .selector-card:hover { transform: scale(1.12); z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         .selector-card.selected { 
             background: var(--primary); 
             color: var(--bg);
             border-color: #fff;
-            box-shadow: 0 0 10px var(--primary);
+            box-shadow: 0 0 12px var(--primary);
         }
-        .selector-card.disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+        .selector-card.disabled { opacity: 0.25; cursor: not-allowed; pointer-events: none; }
 
         .manual-slot-container {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
         }
 
         .manual-slot {
-            width: 100px;
-            height: 140px;
-            border: 2px dashed rgba(255,255,255,0.1);
+            width: 95px;
+            height: 135px;
+            border: 2px dashed rgba(255,255,255,0.15);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -242,59 +279,465 @@
 
         .manual-slot.filled { border: none; background: transparent; }
 
-        /* Tabs */
+        /* Tabs Navigation */
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 25px;
             overflow-x: auto;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            scrollbar-width: thin;
         }
 
         .tab {
-            padding: 10px 20px;
+            padding: 11px 18px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             color: var(--text-muted);
             white-space: nowrap;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .tab:hover {
+            color: var(--text);
+            border-color: var(--border-highlight);
+            background: var(--surface-elevated);
         }
 
         .tab.active {
             background: var(--surface-elevated);
             color: var(--primary);
             border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: fadeIn 0.25s ease-in; }
 
-        /* Stats */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats & Metric Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
             margin-top: 20px;
         }
 
         .stat-card {
             background: var(--surface);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 16px 18px;
+            border-radius: 12px;
             text-align: center;
             border: 1px solid var(--border);
+            transition: border-color 0.2s;
         }
 
-        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-card:hover { border-color: var(--border-highlight); }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .stat-subtext { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
 
-        @media (max-width: 600px) {
-            .card { width: 60px; height: 90px; padding: 5px; }
-            .card .rank { font-size: 1rem; }
-            .card .suit { font-size: 1.5rem; }
+        /* UI Controls & Form Elements */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-label .sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .form-control {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b949e' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-elevated);
+            outline: none;
+            border: 1px solid var(--border);
+            margin: 8px 0;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--primary-glow);
+            transition: transform 0.15s;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .pill-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pill-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .pill-btn:hover {
+            color: var(--text);
+            border-color: var(--border-highlight);
+        }
+
+        .pill-btn.active {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--primary);
+            border-color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* 2-Column and 3-Column Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .grid-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        /* Chart Canvas Containers */
+        .chart-container {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem;
+            color: var(--text-bright);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 14px;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            cursor: crosshair;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* Tier / Recommendation Cards */
+        .tier-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .tier-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-highlight);
+        }
+
+        .tier-card.featured {
+            border: 2px solid var(--primary);
+            background: linear-gradient(180deg, rgba(251, 191, 36, 0.08) 0%, var(--surface-elevated) 100%);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .tier-badge {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .tier-safe .tier-badge { background: rgba(56, 189, 248, 0.2); color: var(--secondary); }
+        .tier-rec .tier-badge { background: rgba(251, 191, 36, 0.2); color: var(--primary); }
+        .tier-pro .tier-badge { background: rgba(74, 222, 128, 0.2); color: var(--success); }
+
+        .tier-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-bright);
+            margin-bottom: 4px;
+        }
+
+        .tier-units {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tier-details {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .tier-detail-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Custom Data Tables */
+        .data-table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--surface-elevated);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .data-table .mono { font-family: 'JetBrains Mono', monospace; }
+        .data-table .highlight-col { color: var(--primary); font-weight: 600; }
+
+        /* Accordions / Deep Dives */
+        .accordion-box {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .accordion-header:hover { background: var(--surface-hover); }
+        .accordion-content {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text);
+        }
+        .accordion-box.open .accordion-content { display: block; }
+        .accordion-arrow { transition: transform 0.2s; }
+        .accordion-box.open .accordion-arrow { transform: rotate(180deg); }
+
+        .callout-box {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--secondary);
+            padding: 16px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        .callout-box.gold {
+            background: rgba(251, 191, 36, 0.08);
+            border-left-color: var(--primary);
+        }
+
+        .callout-box.danger {
+            background: rgba(248, 113, 113, 0.08);
+            border-left-color: var(--danger);
+        }
+
+        /* Tooltip style */
+        .chart-tooltip {
+            position: absolute;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-highlight);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 800px) {
+            .grid-2, .grid-3, .tier-cards-grid { grid-template-columns: 1fr; }
+            .card { width: 56px; height: 86px; padding: 4px; }
+            .card .rank { font-size: 0.95rem; }
+            .card .suit { font-size: 1.3rem; }
             h1 { font-size: 1.8rem; }
             .card-selector-grid { grid-template-columns: repeat(7, 1fr); }
+            .canvas-wrapper { height: 260px; }
         }
     </style>
 </head>
@@ -303,7 +746,7 @@
     <header>
         <div class="container">
             <h1>Video Poker Genie</h1>
-            <p class="subtitle">Master optimal strategy with the Genie's solver</p>
+            <p class="subtitle">Mathematical Solver, Variance Visualizer & Bankroll Engine for Jacks or Better</p>
         </div>
     </header>
 
@@ -311,10 +754,12 @@
         
         <nav class="tabs">
             <div class="tab active" onclick="switchTab('play')">🎮 Trainer</div>
+            <div class="tab" onclick="switchTab('variance')">📊 Variance & Returns</div>
+            <div class="tab" onclick="switchTab('optimal-bankroll')">🎯 Optimal Bankroll & EV</div>
             <div class="tab" onclick="switchTab('paytable')">📜 Paytable</div>
             <div class="tab" onclick="switchTab('solver')">🧞 Manual Solver</div>
-            <div class="tab" onclick="switchTab('learn')">📚 Learn</div>
-            <div class="tab" onclick="switchTab('bankroll')">💰 Bankroll</div>
+            <div class="tab" onclick="switchTab('bankroll')">💰 Strategy Rules</div>
+            <div class="tab" onclick="switchTab('learn')">📚 Learn Math</div>
         </nav>
 
         <!-- Trainer Tab -->
@@ -325,7 +770,7 @@
                 </div>
 
                 <div class="controls">
-                    <div class="stat-card" style="min-width: 120px;">
+                    <div class="stat-card" style="min-width: 120px; padding: 8px 16px;">
                         <div class="stat-label">Credits</div>
                         <div class="stat-value" id="balance">1000</div>
                     </div>
@@ -342,16 +787,443 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="stat-accuracy">0%</div>
-                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-label">Strategy Accuracy</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-hands">0</div>
-                    <div class="stat-label">Hands</div>
+                    <div class="stat-label">Hands Played</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-winloss">0</div>
                     <div class="stat-label">Session Profit</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- NEW TAB 1: Variance & Return Distribution -->
+        <div id="tab-variance" class="tab-content">
+            <div class="game-board">
+                <h2 style="color: var(--primary); margin-bottom: 6px;">📊 Variance & Return Distribution Visualizer</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                    Model the statistical volatility, downside risk, and probability distribution of possible returns based on your starting bankroll, bet size, and session length for 9/6 Full Pay Jacks or Better.
+                </p>
+
+                <!-- Inputs Grid -->
+                <div class="grid-controls">
+                    <!-- Starting Bankroll -->
+                    <div class="input-group">
+                        <label class="input-label">
+                            Starting Bankroll
+                            <span class="sub" id="var-bankroll-units-label">800 bets</span>
+                        </label>
+                        <input type="number" id="var-bankroll-input" class="form-control" value="1000" min="10" max="100000" step="50" oninput="handleVarianceParamChange()">
+                        <div class="pill-group" style="margin-top:4px;">
+                            <button class="pill-btn" onclick="setVarianceBankroll(200)">$200</button>
+                            <button class="pill-btn" onclick="setVarianceBankroll(500)">$500</button>
+                            <button class="pill-btn active" onclick="setVarianceBankroll(1000)">$1,000</button>
+                            <button class="pill-btn" onclick="setVarianceBankroll(2500)">$2,500</button>
+                            <button class="pill-btn" onclick="setVarianceBankroll(5000)">$5,000</button>
+                        </div>
+                    </div>
+
+                    <!-- Denomination -->
+                    <div class="input-group">
+                        <label class="input-label">Coin Denomination</label>
+                        <select id="var-denom-select" class="form-control" onchange="handleVarianceParamChange()">
+                            <option value="0.05">Nickel ($0.05)</option>
+                            <option value="0.10">Dime ($0.10)</option>
+                            <option value="0.25" selected>Quarter ($0.25)</option>
+                            <option value="0.50">Half-Dollar ($0.50)</option>
+                            <option value="1.00">Dollar ($1.00)</option>
+                            <option value="2.00">Two-Dollar ($2.00)</option>
+                            <option value="5.00">Five-Dollar ($5.00)</option>
+                            <option value="10.00">Ten-Dollar ($10.00)</option>
+                            <option value="25.00">Twenty-Five ($25.00)</option>
+                            <option value="100.00">Hundred ($100.00)</option>
+                        </select>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;" id="var-bet-per-hand-label">
+                            Bet per hand: $1.25 (5 coins)
+                        </div>
+                    </div>
+
+                    <!-- Coins Bet -->
+                    <div class="input-group">
+                        <label class="input-label">Coins Per Hand</label>
+                        <select id="var-coins-select" class="form-control" onchange="handleVarianceParamChange()">
+                            <option value="5" selected>5 Coins (Max - 99.54% EV 👑)</option>
+                            <option value="4">4 Coins (98.18% EV)</option>
+                            <option value="3">3 Coins (98.18% EV)</option>
+                            <option value="2">2 Coins (98.18% EV)</option>
+                            <option value="1">1 Coin (98.18% EV)</option>
+                        </select>
+                        <div style="font-size:0.75rem; color:var(--secondary); margin-top:4px;">
+                            ⭐ 5 coins enables 800:1 Royal payout
+                        </div>
+                    </div>
+
+                    <!-- Hands Played -->
+                    <div class="input-group">
+                        <label class="input-label">
+                            Hands Played
+                            <span class="sub" id="var-hands-time-label">~3.3 Hours</span>
+                        </label>
+                        <input type="range" id="var-hands-slider" class="range-slider" min="100" max="50000" step="100" value="2000" oninput="syncVarianceHands(this.value)">
+                        <input type="number" id="var-hands-input" class="form-control" value="2000" min="50" max="200000" step="100" oninput="syncVarianceHands(this.value)">
+                        <div class="pill-group" style="margin-top:6px;">
+                            <button class="pill-btn" onclick="syncVarianceHands(600)">600 (1h)</button>
+                            <button class="pill-btn active" onclick="syncVarianceHands(2000)">2k (Trip)</button>
+                            <button class="pill-btn" onclick="syncVarianceHands(5000)">5k (Wknd)</button>
+                            <button class="pill-btn" onclick="syncVarianceHands(40391)">40.4k (1 Cycle)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Action Bar -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn btn-deal" onclick="runMonteCarloSimulation()" style="font-size:0.95rem; padding:10px 22px;">
+                            🎲 Run Simulation (5,000 Paths)
+                        </button>
+                        <button class="btn btn-secondary-action" onclick="animateSamplePath()">
+                            ▶ Step Animate Single Path
+                        </button>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-muted); font-family:'JetBrains Mono';">
+                        Engine: <span style="color:var(--success)">Exhaustive 9/6 Mathematical Mixture</span>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Dashboard Grid -->
+                <div class="stats-grid" style="margin-top:0; margin-bottom:28px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Expected Value (EV)</div>
+                        <div class="stat-value" id="var-stat-ev" style="color:var(--primary);">-$11.40</div>
+                        <div class="stat-subtext" id="var-stat-ev-pct">99.54% Return</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Volatility (±1σ)</div>
+                        <div class="stat-value" id="var-stat-std" style="color:var(--secondary);">±$247.10</div>
+                        <div class="stat-subtext" id="var-stat-std-units">±197.7 bets</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Risk of Ruin</div>
+                        <div class="stat-value" id="var-stat-ror" style="color:var(--danger);">0.04%</div>
+                        <div class="stat-subtext" id="var-stat-ror-desc">Chance of Busting</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Chance of Profit</div>
+                        <div class="stat-value" id="var-stat-profit-prob" style="color:var(--success);">41.8%</div>
+                        <div class="stat-subtext">P(Ending > Start)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Median Result</div>
+                        <div class="stat-value" id="var-stat-median">-$60.92</div>
+                        <div class="stat-subtext" id="var-stat-median-pct">50th Percentile</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Royal Flush Odds</div>
+                        <div class="stat-value" id="var-stat-royal-prob" style="color:var(--primary);">4.83%</div>
+                        <div class="stat-subtext" id="var-stat-royal-desc">1 in 20.7 runs</div>
+                    </div>
+                </div>
+
+                <!-- Chart 1: Return & Bankroll Probability Distribution -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span>📈</span> Probability Distribution of Ending Bankroll
+                        </div>
+                        <div class="chart-legend">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text); font-size:0.8rem;">
+                                <input type="checkbox" id="var-show-no-royal-toggle" onchange="renderDistributionChart()" checked>
+                                Show "Without Royal Flush" Overlay
+                            </label>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--danger);"></div> Loss (< $Start)</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--success);"></div> Profit (> $Start)</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--primary);"></div> Royal Tail</div>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper" id="wrapper-distribution">
+                        <canvas id="canvas-distribution"></canvas>
+                        <div id="tooltip-distribution" class="chart-tooltip"></div>
+                    </div>
+                    <div style="margin-top:12px; font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; flex-wrap:wrap;">
+                        <span>💡 <strong>Insight:</strong> The median player loses more than theoretical EV because the massive 800:1 Royal Flush carries ~2% of the game's overall return.</span>
+                        <span id="var-dist-ci-label">95% CI: $510.00 — $1,475.00</span>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Monte Carlo Bankroll Trajectory Fan Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span>🌊</span> Bankroll Trajectories & Confidence Cone (Fan Chart)
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-color" style="background:rgba(56, 189, 248, 0.4);"></div> 5th–95% Band</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--secondary);"></div> Median Path</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--primary);"></div> Theoretical EV</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--danger);"></div> Ruin ($0)</div>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper" id="wrapper-trajectories">
+                        <canvas id="canvas-trajectories"></canvas>
+                        <div id="tooltip-trajectories" class="chart-tooltip"></div>
+                    </div>
+                    <div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">
+                        ⭐ Gold star markers represent simulated hands where a Royal Flush jackpot occurred.
+                    </div>
+                </div>
+
+                <!-- Percentile Breakdown Table -->
+                <h3 style="color: var(--secondary); margin-top: 30px; margin-bottom: 12px; font-family: 'JetBrains Mono';">
+                    📋 Percentile Outcome Spectrum
+                </h3>
+                <div class="data-table-container">
+                    <table class="data-table" id="var-percentiles-table">
+                        <!-- Populated dynamically by JS -->
+                    </table>
+                </div>
+
+                <!-- Paytable Variance Contribution Accordion -->
+                <div class="accordion-box">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>🔬 Deep Dive: Paytable Contribution to Expected Value & Variance</span>
+                        <span class="accordion-arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p style="margin-bottom:14px;">
+                            In 9/6 Jacks or Better, over <strong>77.3%</strong> of total game variance ($\sigma^2 pprox 19.516$) is driven by the <strong>Royal Flush</strong> alone. Here is the exact mathematical decomposition per 5-coin bet ($B$):
+                        </p>
+                        <div class="data-table-container">
+                            <table class="data-table" id="var-paytable-variance-table">
+                                <!-- Populated dynamically -->
+                            </table>
+                        </div>
+                        <div class="callout-box gold">
+                            <strong>The Royal Flush Paradox:</strong> Without hitting a Royal Flush, the base game return is only <strong>97.56%</strong> (a loss rate of -2.44% per hand). Because the Royal Flush occurs only once every 40,391 hands, the majority of playing sessions will feel like you are losing faster than 99.54% until a jackpot is hit!
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- NEW TAB 2: Optimal Bankroll & EV Convergence -->
+        <div id="tab-optimal-bankroll" class="tab-content">
+            <div class="game-board">
+                <h2 style="color: var(--primary); margin-bottom: 6px;">🎯 Optimal Bankroll & EV Convergence Calculator</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                    Calculate the mathematically required bankroll to eliminate Risk of Ruin, survive Royal Flush droughts, and overcome variance to realize the true theoretical 99.54% Jacks or Better expected value.
+                </p>
+
+                <!-- Calculation Goal Selector -->
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">
+                        Select Bankroll Objective:
+                    </div>
+                    <div class="pill-group" id="bankroll-mode-pills">
+                        <button class="pill-btn active" onclick="setBankrollGoal('session')">🛡️ Trip & Session Survival</button>
+                        <button class="pill-btn" onclick="setBankrollGoal('convergence')">🎯 Achieve EV Convergence</button>
+                        <button class="pill-btn" onclick="setBankrollGoal('royal')">👑 Royal Flush Drought Hunter</button>
+                        <button class="pill-btn" onclick="setBankrollGoal('advantage')">💎 Advantage Play & Comps (Kelly)</button>
+                    </div>
+                </div>
+
+                <!-- Interactive Settings Grid -->
+                <div class="grid-controls">
+                    <!-- Denomination -->
+                    <div class="input-group">
+                        <label class="input-label">Coin Denomination</label>
+                        <select id="opt-denom-select" class="form-control" onchange="handleBankrollParamChange()">
+                            <option value="0.05">Nickel ($0.05)</option>
+                            <option value="0.10">Dime ($0.10)</option>
+                            <option value="0.25" selected>Quarter ($0.25)</option>
+                            <option value="0.50">Half-Dollar ($0.50)</option>
+                            <option value="1.00">Dollar ($1.00)</option>
+                            <option value="2.00">Two-Dollar ($2.00)</option>
+                            <option value="5.00">Five-Dollar ($5.00)</option>
+                            <option value="10.00">Ten-Dollar ($10.00)</option>
+                            <option value="25.00">Twenty-Five ($25.00)</option>
+                            <option value="100.00">Hundred ($100.00)</option>
+                        </select>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;" id="opt-bet-display">
+                            $1.25 per hand (5 coins)
+                        </div>
+                    </div>
+
+                    <!-- Playing Speed -->
+                    <div class="input-group">
+                        <label class="input-label">
+                            Playing Speed
+                            <span class="sub" id="opt-speed-label">600 hands/hr</span>
+                        </label>
+                        <select id="opt-speed-select" class="form-control" onchange="handleBankrollParamChange()">
+                            <option value="400">Casual Play (400 hands/hr)</option>
+                            <option value="600" selected>Average Player (600 hands/hr)</option>
+                            <option value="800">Fast Player (800 hands/hr)</option>
+                            <option value="1000">Pro Grinder (1,000 hands/hr)</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic Goal-Specific Control 1 -->
+                    <div class="input-group" id="opt-dynamic-ctrl-1">
+                        <!-- Replaced dynamically based on mode -->
+                    </div>
+
+                    <!-- Dynamic Goal-Specific Control 2 -->
+                    <div class="input-group" id="opt-dynamic-ctrl-2">
+                        <!-- Replaced dynamically based on mode -->
+                    </div>
+                </div>
+
+                <!-- Primary Recommendation Hero Banner / Tier Cards -->
+                <div class="tier-cards-grid">
+                    <!-- Minimum Safe Tier -->
+                    <div class="tier-card tier-safe">
+                        <div class="tier-badge">🛡️ Minimum Safe</div>
+                        <div class="tier-amount" id="opt-tier-safe-amt">$750</div>
+                        <div class="tier-units" id="opt-tier-safe-units">600 Max Bets (3,000 Coins)</div>
+                        <div class="tier-details">
+                            <div class="tier-detail-row"><span>Survival Rate:</span> <strong style="color:var(--secondary)">90.0%</strong></div>
+                            <div class="tier-detail-row"><span>Risk of Ruin:</span> <strong>10.0%</strong></div>
+                            <div class="tier-detail-row"><span>Play Style:</span> <span>Casual / Short Trip</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Tier -->
+                    <div class="tier-card tier-rec featured">
+                        <div class="tier-badge">⭐ Recommended Standard</div>
+                        <div class="tier-amount" id="opt-tier-rec-amt" style="color:var(--primary);">$1,250</div>
+                        <div class="tier-units" id="opt-tier-rec-units">1,000 Max Bets (5,000 Coins)</div>
+                        <div class="tier-details">
+                            <div class="tier-detail-row"><span>Survival Rate:</span> <strong style="color:var(--primary)">95.0%</strong></div>
+                            <div class="tier-detail-row"><span>Risk of Ruin:</span> <strong>5.0%</strong></div>
+                            <div class="tier-detail-row"><span>Play Style:</span> <span>Standard Full Session</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Ironclad Pro Tier -->
+                    <div class="tier-card tier-pro">
+                        <div class="tier-badge">🏰 Ironclad Pro</div>
+                        <div class="tier-amount" id="opt-tier-pro-amt" style="color:var(--success);">$1,850</div>
+                        <div class="tier-units" id="opt-tier-pro-units">1,480 Max Bets (7,400 Coins)</div>
+                        <div class="tier-details">
+                            <div class="tier-detail-row"><span>Survival Rate:</span> <strong style="color:var(--success)">99.0%</strong></div>
+                            <div class="tier-detail-row"><span>Risk of Ruin:</span> <strong>1.0%</strong></div>
+                            <div class="tier-detail-row"><span>Play Style:</span> <span>Serious Grinder / Zero Risk</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal Context Summary Stats -->
+                <div class="stats-grid" style="margin-bottom:28px;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Coin-In / Wagered</div>
+                        <div class="stat-value" id="opt-stat-coin-in" style="color:var(--text-bright);">$12,500</div>
+                        <div class="stat-subtext" id="opt-stat-hands-sub">10,000 Hands</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Expected Net Cost (Loss/Gain)</div>
+                        <div class="stat-value" id="opt-stat-net-cost" style="color:var(--primary);">-$57.00</div>
+                        <div class="stat-subtext" id="opt-stat-net-pct">-0.456% Theoretical House Edge</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Expected Royal Flushes</div>
+                        <div class="stat-value" id="opt-stat-royals-exp" style="color:var(--secondary);">0.25</div>
+                        <div class="stat-subtext" id="opt-stat-royal-odds">1 in 40,391 hands</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Required Playing Time</div>
+                        <div class="stat-value" id="opt-stat-time" style="color:var(--text-bright);">16.7 Hours</div>
+                        <div class="stat-subtext">At selected speed</div>
+                    </div>
+                </div>
+
+                <!-- Visualizer 1: The EV Convergence Funnel ("Cone of Uncertainty") -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span>⏳</span> The EV Convergence Funnel ("Cone of Uncertainty")
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-color" style="background:var(--primary);"></div> Theoretical EV (99.54%)</div>
+                            <div class="legend-item"><div class="legend-color" style="background:rgba(56, 189, 248, 0.45);"></div> 95.4% (±2σ) Band</div>
+                            <div class="legend-item"><div class="legend-color" style="background:rgba(56, 189, 248, 0.2);"></div> 99.7% (±3σ) Band</div>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper" id="wrapper-convergence">
+                        <canvas id="canvas-convergence"></canvas>
+                        <div id="tooltip-convergence" class="chart-tooltip"></div>
+                    </div>
+                    <div style="margin-top:12px; font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; flex-wrap:wrap;">
+                        <span>💡 <strong>Law of Large Numbers:</strong> As hand count increases, percentage return converges precisely to 99.54%, but required bankroll cushion expands with $\sqrt{N}$.</span>
+                        <span id="opt-conv-hover-hint">Hover over chart to inspect EV accuracy at any hand count</span>
+                    </div>
+                </div>
+
+                <!-- Visualizer 2: Risk of Ruin vs. Bankroll Curve -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <span>📉</span> Risk of Ruin vs. Starting Bankroll
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-color" style="background:var(--danger);"></div> Danger Zone (>10%)</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--primary);"></div> Moderate (2-10%)</div>
+                            <div class="legend-item"><div class="legend-color" style="background:var(--success);"></div> Safe (<2%)</div>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper" id="wrapper-ror">
+                        <canvas id="canvas-ror"></canvas>
+                        <div id="tooltip-ror" class="chart-tooltip"></div>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Multi-Denomination Bankroll Reference Matrix -->
+                <h3 style="color: var(--secondary); margin-top: 30px; margin-bottom: 12px; font-family: 'JetBrains Mono';">
+                    📊 Universal Video Poker Bankroll Matrix (9/6 Jacks or Better)
+                </h3>
+                <div class="data-table-container">
+                    <table class="data-table" id="opt-bankroll-matrix-table">
+                        <!-- Populated dynamically -->
+                    </table>
+                </div>
+
+                <!-- Mathematical Proofs & Theory Accordion -->
+                <div class="accordion-box">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>📐 Mathematical Foundations & Formulas for Bankroll Calculations</span>
+                        <span class="accordion-arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <h4 style="color:var(--secondary); margin-bottom:8px;">1. Finite-Horizon Brownian Motion / Gambler's Ruin</h4>
+                        <p style="margin-bottom:12px;">
+                            For a session of $N$ hands with base game downward drift $\mu_{	ext{base}} = -0.024369$ per bet and standard deviation $\sigma_{	ext{base}} = 1.9257$, the minimum bankroll $B$ to ensure survival probability $\ge 1 - lpha$ is:
+                        </p>
+                        <div style="background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:8px; font-family:'JetBrains Mono'; margin-bottom:14px;">
+                            $$B(N, lpha) = Z_{1-lpha} \cdot \sigma_{	ext{base}} \cdot \sqrt{N} + N \cdot |\mu_{	ext{base}}|$$
+                        </div>
+
+                        <h4 style="color:var(--secondary); margin-bottom:8px;">2. Sample Mean Convergence to Expected Value (Central Limit Theorem)</h4>
+                        <p style="margin-bottom:12px;">
+                            To be $(1-lpha)$ confident that your observed return $ar{X}$ is within $\pm \Delta$ of true theoretical EV ($99.54\%$), with full game standard deviation $\sigma = 4.417662$:
+                        </p>
+                        <div style="background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:8px; font-family:'JetBrains Mono'; margin-bottom:14px;">
+                            $$N_{	ext{hands}} = \left( rac{Z_{1-lpha/2} \cdot \sigma}{\Delta} ight)^2$$
+                        </div>
+                        <p style="margin-bottom:14px;">
+                            For example, to be 95% confident of being within $\pm 1\%$ of EV ($\Delta = 0.01$):
+                            $N = \left( rac{1.96 	imes 4.417662}{0.01} ight)^2 pprox \mathbf{749,716 	ext{ hands}}$!
+                        </p>
+
+                        <h4 style="color:var(--secondary); margin-bottom:8px;">3. Advantage Play & Kelly Criterion (When Comps > House Edge)</h4>
+                        <p style="margin-bottom:12px;">
+                            When player rewards/cashback $c > 0.4561\%$, the net expected return $\mu_{	ext{net}} > 0$. The optimal fraction of bankroll to wager on each hand under Kelly Criterion is $f^* = rac{\mu_{	ext{net}}}{\sigma^2}$.
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -363,7 +1235,7 @@
                     <!-- Dynamic -->
                 </table>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 20px; text-align: center;">
-                    * 5 coins unlocks the bonus Royal Flush payout (800:1).
+                    * 5 coins unlocks the bonus Royal Flush payout (800:1 vs 250:1).
                 </p>
             </div>
         </div>
@@ -372,7 +1244,7 @@
         <div id="tab-solver" class="tab-content">
             <div class="game-board">
                 <h2 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Manual Hand Solver</h2>
-                <p style="margin-bottom: 25px; color: var(--text-muted); text-align: center;">Pick 5 cards from the deck to find the optimal strategy.</p>
+                <p style="margin-bottom: 25px; color: var(--text-muted); text-align: center;">Pick 5 cards from the deck to find the mathematically optimal hold.</p>
                 
                 <div class="manual-slot-container" id="manual-slots">
                     <div class="manual-slot"></div>
@@ -398,34 +1270,39 @@
             </div>
         </div>
 
-        <!-- Learn Tab -->
-        <div id="tab-learn" class="tab-content">
+        <!-- Strategy Rules Tab (formerly bankroll) -->
+        <div id="tab-bankroll" class="tab-content">
             <div class="game-board">
-                <h2 style="color: var(--primary); margin-bottom: 20px;">Mastering the Math</h2>
-                <p style="margin-bottom: 15px;">Video Poker is a game of skill and mathematics. Unlike slots, your decisions directly impact the return of the game.</p>
-                
-                <h3 style="color: var(--secondary); margin-top: 20px; margin-bottom: 10px;">Exhaustive Expectation Evaluation</h3>
-                <p>The Genie uses a "Brute Force" solver. When you are dealt 5 cards, there are exactly <strong>32 ways</strong> you can hold them. For each of those 32 ways, the solver calculates the outcome of every possible replacement card combination from the 47 cards left in the deck.</p>
-                
-                <div style="background: var(--surface-elevated); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                    <p><strong>Expected Value (EV):</strong> The average amount of money you expect to win for a specific hold over the long term.</p>
-                    <p style="margin-top: 10px;"><em>Example:</em> Holding a Pair of Jacks might have an EV of 0.54, while drawing 5 new cards might have an EV of 0.32. The Genie tells you to hold the Jacks because 0.54 > 0.32.</p>
+                <h2 style="color: var(--primary); margin-bottom: 20px;">Bankroll Management Rules & Principles</h2>
+                <div class="stat-card" style="text-align: left; margin-bottom: 20px; border-left: 4px solid var(--success);">
+                    <h3 style="color: var(--success); margin-bottom: 10px;">Rule #1: Always Bet Max (5 Coins)</h3>
+                    <p>The Royal Flush payout jumps from 250:1 to 800:1 only when you bet 5 coins. This single bonus accounts for roughly 1.36% of the total return (99.54% vs 98.18%). <strong>If you cannot afford 5 coins at your current denomination, drop down a denomination (e.g. from $1 to $0.25) so you can bet 5 coins.</strong></p>
+                </div>
+
+                <div class="stat-card" style="text-align: left; margin-bottom: 20px; border-left: 4px solid var(--secondary);">
+                    <h3 style="color: var(--secondary); margin-bottom: 10px;">Rule #2: The 3-5 Day Bankroll Rule</h3>
+                    <p>To withstand the natural volatility of waiting for a Royal Flush (1 in 40,391 hands), you should maintain a bankroll of at least <strong>1,500 to 4,000 max bets</strong> for extended play.</p>
+                </div>
+
+                <div class="stat-card" style="text-align: left; border-left: 4px solid var(--primary);">
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Rule #3: Session Stop-Loss vs Overall Bankroll</h3>
+                    <p>Never bring your entire bankroll to a single machine session. Divide your bankroll into <strong>trip session units</strong> (e.g. 200 to 400 bets per session) to prevent tilt and ensure longevity.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Bankroll Tab -->
-        <div id="tab-bankroll" class="tab-content">
+        <!-- Learn Tab -->
+        <div id="tab-learn" class="tab-content">
             <div class="game-board">
-                <h2 style="color: var(--primary); margin-bottom: 20px;">Optimal Bet Sizing</h2>
-                <div class="stat-card" style="text-align: left; margin-bottom: 20px;">
-                    <h3 style="color: var(--success); margin-bottom: 10px;">Always Bet Max (5 Coins)</h3>
-                    <p>The Royal Flush payout jumps from 250:1 to 800:1 only when you bet 5 coins. This single bonus accounts for roughly 1.5% of the total return. <strong>Never bet fewer than 5 coins.</strong></p>
-                </div>
-
-                <div class="stat-card" style="text-align: left;">
-                    <h3 style="color: var(--secondary); margin-bottom: 10px;">Bankroll Management</h3>
-                    <p>To withstand the high variance of waiting for a Royal Flush, you should have a bankroll of at least 3-5 days worth of play, or roughly 2,000 to 5,000 units.</p>
+                <h2 style="color: var(--primary); margin-bottom: 20px;">Mastering the Mathematics of Video Poker</h2>
+                <p style="margin-bottom: 15px;">Video Poker is a game of skill, probability, and rigorous mathematics. Unlike slot machines, your decisions directly control the payout return.</p>
+                
+                <h3 style="color: var(--secondary); margin-top: 20px; margin-bottom: 10px;">Exhaustive Expectation Evaluation</h3>
+                <p>The Genie uses an exact mathematical solver. When dealt 5 cards, there are exactly <strong>32 ways ($2^5$)</strong> you can hold them. For each of those 32 ways, the solver calculates the outcome of every possible replacement card combination from the 47 cards remaining in the deck.</p>
+                
+                <div style="background: var(--surface-elevated); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Expected Value (EV):</strong> The average amount of money returned for a specific hold over the long term.</p>
+                    <p style="margin-top: 10px;"><em>Example:</em> Holding a High Pair of Jacks has an EV of 7.68 credits (on a 5-coin bet), while holding an unsuited TJQK has an EV of 3.20. The Genie recommends holding the Jacks because $7.68 > 3.20$.</p>
                 </div>
             </div>
         </div>
@@ -433,7 +1310,7 @@
     </div>
 
     <script>
-        // --- Game Config & Data ---
+        // --- 1. CORE VIDEO POKER CONFIG & EXACT CONSTANTS ---
         const SUITS = ['♠', '♣', '♥', '♦'];
         const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         const RANK_VALUES = { '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14 };
@@ -463,23 +1340,60 @@
             'NOTHING': 'Nothing'
         };
 
-        // --- State ---
+        // Exact 9/6 Jacks or Better Optimal Play Probabilities & Multipliers (5 coins)
+        const JOB_PAYOUT_SPECTRUM = [
+            { id: 'ROYAL_FLUSH', name: 'Royal Flush', multiplier: 800, prob: 0.00002476, hitRatio: '1 in 40,391' },
+            { id: 'STRAIGHT_FLUSH', name: 'Straight Flush', multiplier: 50, prob: 0.0001093, hitRatio: '1 in 9,148' },
+            { id: 'FOUR_OF_A_KIND', name: '4 of a Kind', multiplier: 25, prob: 0.0023625, hitRatio: '1 in 423' },
+            { id: 'FULL_HOUSE', name: 'Full House', multiplier: 9, prob: 0.0115122, hitRatio: '1 in 86.9' },
+            { id: 'FLUSH', name: 'Flush', multiplier: 6, prob: 0.0110145, hitRatio: '1 in 90.8' },
+            { id: 'STRAIGHT', name: 'Straight', multiplier: 4, prob: 0.0112294, hitRatio: '1 in 89.1' },
+            { id: 'THREE_OF_A_KIND', name: '3 of a Kind', multiplier: 3, prob: 0.0744487, hitRatio: '1 in 13.4' },
+            { id: 'TWO_PAIR', name: 'Two Pair', multiplier: 2, prob: 0.1292789, hitRatio: '1 in 7.74' },
+            { id: 'JACKS_OR_BETTER', name: 'Jacks or Better', multiplier: 1, prob: 0.2145850, hitRatio: '1 in 4.66' },
+            { id: 'NOTHING', name: 'Loss / Nothing', multiplier: 0, prob: 0.54543474, hitRatio: '54.54%' }
+        ];
+
+        // Overall 9/6 JoB Statistical Constants (per 1 unit bet with 5 coins)
+        const EV_5COIN = 0.995439;            // 99.5439%
+        const VAR_5COIN = 19.515734;          // Variance per 5-coin bet
+        const STD_5COIN = 4.417662;           // Std Dev per 5-coin bet
+
+        // Base game without Royal Flush
+        const EV_NO_ROYAL = 0.975631;         // 97.5631%
+        const VAR_NO_ROYAL = 3.708378;        // Variance without Royal
+        const STD_NO_ROYAL = 1.925715;        // Std Dev without Royal
+
+        // State for Trainer & Solver
         let deck = [];
         let hand = [];
         let heldIndices = new Set();
-        let gameState = 'IDLE'; // IDLE, DEALT, RESULT
+        let gameState = 'IDLE';
         let balance = 1000;
         let startBalance = 1000;
         let stats = { hands: 0, correct: 0 };
         let manualHand = [];
 
-        // --- Initialization ---
+        // State for Variance Tab
+        let varSimResults = null;
+        let isSimulating = false;
+        let animationFrameId = null;
+
+        // State for Optimal Bankroll Tab
+        let optGoal = 'session'; // 'session', 'convergence', 'royal', 'advantage'
+        let lastConvergenceTargetHands = 2400;
+
+        // --- 2. INITIALIZATION ---
         function init() {
             renderPaytable();
             createDeck();
             renderSelectorGrid();
             updateUI();
             updateManualUI();
+            initVarianceTab();
+            initOptimalBankrollTab();
+            setupChartTooltips();
+            window.addEventListener('resize', handleWindowResize);
         }
 
         function createDeck() {
@@ -498,7 +1412,7 @@
             }
         }
 
-        // --- Logic ---
+        // --- 3. TRAINER & SOLVER LOGIC ---
         function handleDeal() {
             const feedbackPanel = document.getElementById('feedback-panel');
             
@@ -512,19 +1426,16 @@
                 gameState = 'DEALT';
                 feedbackPanel.style.display = 'none';
             } else if (gameState === 'DEALT') {
-                // Before drawing, evaluate if user made the right choice
                 const results = solveHand(hand);
                 const best = results[0];
                 const userHoldKey = Array.from(heldIndices).sort().join(',');
                 const bestHoldKey = best.indices.sort().join(',');
                 
                 const isCorrect = userHoldKey === bestHoldKey;
-                const userEv = results.find(r => r.indices.sort().join(',') === userHoldKey).ev;
                 
                 stats.hands++;
                 if (isCorrect) stats.correct++;
                 
-                // Draw new cards
                 for (let i = 0; i < 5; i++) {
                     if (!heldIndices.has(i)) {
                         hand[i] = deck.splice(0, 1)[0];
@@ -536,7 +1447,6 @@
                 balance += win;
                 gameState = 'RESULT';
                 
-                // Show Guidance
                 feedbackPanel.style.display = 'block';
                 const title = document.getElementById('feedback-title');
                 title.textContent = isCorrect ? "✓ Perfect Hold!" : "✗ Strategy Mistake";
@@ -563,7 +1473,7 @@
                 
             } else if (gameState === 'RESULT') {
                 gameState = 'IDLE';
-                handleDeal(); // Start next hand immediately
+                handleDeal();
             }
             updateUI();
         }
@@ -572,12 +1482,9 @@
             if (gameState !== 'DEALT') return;
             const results = solveHand(hand);
             const best = results[0];
-            
-            // Highlight the correct cards as a "hint"
             heldIndices.clear();
             best.indices.forEach(i => heldIndices.add(i));
             updateUI();
-            
             alert(`Genie's Hint: Hold ${best.indices.length === 0 ? "NOTHING" : best.indices.map(i => hand[i].rank + hand[i].suit).join(', ')}`);
         }
 
@@ -633,13 +1540,10 @@
             return PAYTABLE[handType][bet - 1];
         }
 
-        // --- Intuitive Explanations (Aligned with Wizard of Odds Optimal Strategy) ---
         function getIntuitiveExplanation(h, bestIdx) {
             const heldCards = bestIdx.map(i => h[i]);
-            const drawCount = 5 - bestIdx.length;
             const type = evaluateHand(heldCards);
             
-            // Priority 1: Pat Hands (High value)
             if (bestIdx.length === 5) {
                 if (type === 'ROYAL_FLUSH') return "Priority #1: Royal Flush. Never discard a jackpot!";
                 if (type === 'STRAIGHT_FLUSH') return "Priority #1: Straight Flush. A rare high-payout hand.";
@@ -647,42 +1551,23 @@
                 return "Priority #3: Pat Hand. This Full House, Flush, or Straight is already a winner.";
             }
 
-            // Priority 2: 4 to a Royal Flush
             if (bestIdx.length === 4 && isNToRoyal(heldCards, 4)) {
                 return "Priority #2: 4 to a Royal Flush. The massive jackpot bonus makes this better than almost any pat hand except a Royal itself.";
             }
 
-            // Priority 3: 3 of a Kind
             if (type === 'THREE_OF_A_KIND') return "Priority #3: 3-of-a-Kind. A strong foundation for a Full House or 4-of-a-Kind.";
-
-            // Priority 4: 4 to a Straight Flush
             if (bestIdx.length === 4 && isNToStraightFlush(heldCards, 4)) return "Priority #4: 4 to a Straight Flush. High potential for multiple high-value hands.";
-
-            // Priority 5: Two Pair
             if (type === 'TWO_PAIR') return "Priority #5: Two Pair. Only 1 card away from a Full House.";
-
-            // Priority 6: High Pair
             if (isHighPair(heldCards)) return "Priority #6: High Pair (Jacks or Better). Guaranteed payout and a strong draw for 3-of-a-Kind.";
-
-            // Priority 7: 3 to a Royal Flush
             if (bestIdx.length === 3 && isNToRoyal(heldCards, 3)) return "Priority #7: 3 to a Royal Flush. The high-value potential outweighs a low pair or 4 to a flush.";
-
-            // Priority 8: 4 to a Flush
             if (bestIdx.length === 4 && isNToFlush(heldCards, 4)) return "Priority #8: 4 to a Flush. 9 outs (nearly 20%) to hit a 6x payout.";
-
-            // Priority 9: TJQK
             if (bestIdx.length === 4 && isUnsuitedTJQK(heldCards)) return "Priority #9: Unsuited TJQK. You have many outs for a high straight or a high pair.";
-
-            // Priority 10: Low Pair
             if (isLowPair(heldCards)) return "Priority #10: Low Pair. Statistically better than holding single high cards due to 3-of-a-Kind potential.";
-
-            // Higher priority vs lower priority explanation
             if (bestIdx.length === 0) return "Priority #27: Discard All. Your hand has no strong patterns; drawing 5 new cards is mathematically superior.";
 
             return "This hold follows the Wizard of Odds Optimal Strategy hierarchy, maximizing your long-term return (99.54%).";
         }
 
-        // --- Helper Logic for Categorization ---
         function isNToRoyal(cards, n) {
             const suits = {};
             cards.forEach(c => {
@@ -700,7 +1585,6 @@
         function isNToStraightFlush(cards, n) {
             if (!isNToFlush(cards, n)) return false;
             const values = cards.map(c => RANK_VALUES[c.rank]).sort((a,b) => a-b);
-            // Rough check for consecutive-ish
             return (values[values.length-1] - values[0] <= 4) || (values.includes(14) && values[0] === 2);
         }
 
@@ -741,11 +1625,8 @@
             return `The Genie performed Exhaustive Evaluation on all ${combos.toLocaleString()} possible replacement outcomes. The calculated EV is ${ev.toFixed(4)}, matching the 99.54% optimal strategy return.`;
         }
 
-        // --- Solver Engine ---
         function solveHand(currentHand) {
-            // Optimization: "Discard All" EV for 9/6 JoB is a constant
             const DISCARD_ALL_EV = 0.3644; 
-
             const fullDeck = [];
             for (let suit of SUITS) {
                 for (let rank of RANKS) {
@@ -795,7 +1676,6 @@
                     }
                 }
             } else if (drawCount === 3) {
-                // Full exhaustive (16k)
                 for (let i = 0; i < remainingDeck.length; i++) {
                     for (let j = i + 1; j < remainingDeck.length; j++) {
                         for (let k = j + 1; k < remainingDeck.length; k++) {
@@ -805,9 +1685,6 @@
                     }
                 }
             } else if (drawCount === 4) {
-                // Exhaustive 4-card draw (178k)
-                // We'll use a sample of 15k for real-time responsiveness if needed,
-                // but let's try exhaustive first.
                 for (let i = 0; i < remainingDeck.length; i++) {
                     for (let j = i + 1; j < remainingDeck.length; j++) {
                         for (let k = j + 1; k < remainingDeck.length; k++) {
@@ -822,7 +1699,6 @@
             return totalPayout / totalCombos;
         }
 
-        // --- UI & View ---
         function renderPaytable() {
             const table = document.getElementById('paytable');
             let html = `<tr><th>Hand</th><th>1</th><th>2</th><th>3</th><th>4</th><th class="highlight">5</th></tr>`;
@@ -867,37 +1743,36 @@
             document.getElementById('stat-winloss').textContent = (profit >= 0 ? '+' : '') + profit;
             document.getElementById('stat-winloss').style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // Highlight paytable row if win
             document.querySelectorAll('.paytable tr').forEach(r => r.classList.remove('active-win'));
             if (gameState === 'RESULT') {
                 const res = evaluateHand(hand);
-                if (res !== 'NOTHING') document.getElementById('row-' + res).classList.add('active-win');
+                if (res !== 'NOTHING') {
+                    const el = document.getElementById('row-' + res);
+                    if (el) el.classList.add('active-win');
+                }
             }
         }
 
-        // --- Manual Solver UI ---
+        // --- 4. MANUAL SOLVER UI ---
         function updateManualUI() {
             const slots = document.getElementById('manual-slots').children;
-            
-            // Update slots
             for (let i = 0; i < 5; i++) {
                 const slot = slots[i];
                 const card = manualHand[i];
                 if (card) {
                     slot.className = 'manual-slot filled';
                     slot.innerHTML = `
-                        <div class="card ${card.color}" style="width:100px; height:140px; cursor:pointer;" onclick="toggleManualCard('${card.rank}', '${card.suit}')">
-                            <div class="rank" style="font-size:1.4rem;">${card.rank}</div>
-                            <div class="suit" style="font-size:1.8rem;">${card.suit}</div>
+                        <div class="card ${card.color}" style="width:95px; height:135px; cursor:pointer;" onclick="toggleManualCard('${card.rank}', '${card.suit}')">
+                            <div class="rank" style="font-size:1.3rem;">${card.rank}</div>
+                            <div class="suit" style="font-size:1.7rem;">${card.suit}</div>
                         </div>
                     `;
                 } else {
                     slot.className = 'manual-slot';
-                    slot.innerHTML = '<span style="color:rgba(255,255,255,0.1); font-size:2rem;">+</span>';
+                    slot.innerHTML = '<span style="color:rgba(255,255,255,0.15); font-size:1.8rem;">+</span>';
                 }
             }
 
-            // Update selector grid
             document.querySelectorAll('.selector-card').forEach(el => {
                 const rank = el.dataset.rank;
                 const suit = el.dataset.suit;
@@ -917,7 +1792,6 @@
         function renderSelectorGrid() {
             const grid = document.getElementById('selector-grid');
             grid.innerHTML = '';
-            // Group by Suit for better organization
             SUITS.forEach(suit => {
                 RANKS.forEach(rank => {
                     const div = document.createElement('div');
@@ -946,9 +1820,8 @@
         function solveManualHand() {
             const content = document.getElementById('manual-result-content');
             document.getElementById('manual-result-panel').style.display = 'block';
-            content.innerHTML = "🧞 Genie is thinking...";
+            content.innerHTML = "🧞 Genie is calculating all 32 outcomes...";
             
-            // Wrap in timeout to let UI update
             setTimeout(() => {
                 const results = solveHand(manualHand);
                 const best = results[0];
@@ -956,10 +1829,10 @@
                 let html = `
                     <div style="margin-bottom:20px;">
                         <h4 style="color:var(--primary); margin-bottom:10px;">Optimal Hold:</h4>
-                        <div style="font-size:1.4rem; font-family:'JetBrains Mono'; color:#fff;">
+                        <div style="font-size:1.3rem; font-family:'JetBrains Mono'; color:#fff; font-weight:700;">
                             ${best.indices.length === 0 ? "DISCARD ALL" : best.indices.map(i => manualHand[i].rank + manualHand[i].suit).join(' ')}
                         </div>
-                        <div style="color:var(--success); margin-top:5px;">Expected Value: ${best.ev.toFixed(4)}</div>
+                        <div style="color:var(--success); margin-top:5px; font-weight:600;">Expected Value: ${best.ev.toFixed(4)} credits</div>
                     </div>
                     <h4 style="color:var(--text-muted); margin-bottom:10px;">Top Alternative Holds:</h4>
                     <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
@@ -976,7 +1849,7 @@
                 
                 html += `</table>`;
                 content.innerHTML = html;
-            }, 100);
+            }, 50);
         }
 
         function resetManualSolver() {
@@ -985,11 +1858,1441 @@
             updateManualUI();
         }
 
+        // --- 5. STATISTICAL UTILITIES ---
+        function normalCdf(z) {
+            return 0.5 * (1 + mathErf(z / Math.SQRT2));
+        }
+
+        function mathErf(x) {
+            const a1 =  0.254829592;
+            const a2 = -0.284496736;
+            const a3 =  1.421413741;
+            const a4 = -1.453152027;
+            const a5 =  1.061405429;
+            const p  =  0.3275911;
+
+            const sign = x < 0 ? -1 : 1;
+            const absX = Math.abs(x);
+            const t = 1.0 / (1.0 + p * absX);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+            return sign * y;
+        }
+
+        function normalInv(p) {
+            if (p <= 0.0000001) return -5.0;
+            if (p >= 0.9999999) return 5.0;
+            if (p < 0.5) {
+                return -rationalApproximation(Math.sqrt(-2.0 * Math.log(p)));
+            } else {
+                return rationalApproximation(Math.sqrt(-2.0 * Math.log(1.0 - p)));
+            }
+        }
+
+        function rationalApproximation(t) {
+            const c0 = 2.515517, c1 = 0.802853, c2 = 0.010328;
+            const d1 = 1.432788, d2 = 0.189269, d3 = 0.001308;
+            return t - ((c2 * t + c1) * t + c0) / (((d3 * t + d2) * t + d1) * t + 1.0);
+        }
+
+        function calculateRuinProbability(bankrollUnits, hands, muDrift, sigmaVol) {
+            if (bankrollUnits <= 0) return 1.0;
+            if (hands <= 0) return 0.0;
+            
+            const sqrtN = Math.sqrt(hands);
+            const z1 = (-bankrollUnits - muDrift * hands) / (sigmaVol * sqrtN);
+            const z2 = (-bankrollUnits + muDrift * hands) / (sigmaVol * sqrtN);
+            
+            const term1 = normalCdf(z1);
+            let term2 = 0;
+            if (muDrift !== 0) {
+                const exponent = -2.0 * muDrift * bankrollUnits / (sigmaVol * sigmaVol);
+                if (exponent < 500) {
+                    term2 = Math.exp(exponent) * normalCdf(z2);
+                }
+            } else {
+                term2 = normalCdf(z2);
+            }
+            return Math.min(1.0, Math.max(0.0, term1 + term2));
+        }
+
+        function randomGaussian(mean = 0, stdev = 1) {
+            const u1 = Math.max(1e-15, Math.random());
+            const u2 = Math.random();
+            const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return z0 * stdev + mean;
+        }
+
+        function samplePoisson(lambda) {
+            if (lambda < 30) {
+                const L = Math.exp(-lambda);
+                let k = 0, p = 1.0;
+                do {
+                    k++;
+                    p *= Math.random();
+                } while (p > L);
+                return k - 1;
+            } else {
+                return Math.max(0, Math.round(randomGaussian(lambda, Math.sqrt(lambda))));
+            }
+        }
+
+        function sampleBinomial(n, p) {
+            if (n <= 0 || p <= 0) return 0;
+            if (p >= 1) return n;
+            const mean = n * p;
+            const variance = n * p * (1.0 - p);
+            if (variance > 25) {
+                return Math.max(0, Math.min(n, Math.round(randomGaussian(mean, Math.sqrt(variance)))));
+            } else if (mean < 10) {
+                return Math.min(n, samplePoisson(mean));
+            } else {
+                return Math.max(0, Math.min(n, Math.round(randomGaussian(mean, Math.sqrt(variance)))));
+            }
+        }
+
+        // --- 6. TAB 1: VARIANCE & RETURN DISTRIBUTION ENGINE ---
+        function initVarianceTab() {
+            renderPaytableVarianceDecomposition();
+            handleVarianceParamChange();
+        }
+
+        function handleVarianceParamChange() {
+            const bankroll = parseFloat(document.getElementById('var-bankroll-input').value) || 1000;
+            const denom = parseFloat(document.getElementById('var-denom-select').value) || 0.25;
+            const coins = parseInt(document.getElementById('var-coins-select').value) || 5;
+            const hands = parseInt(document.getElementById('var-hands-input').value) || 2000;
+
+            const handBet = denom * coins;
+            const bankrollUnits = bankroll / handBet;
+
+            document.getElementById('var-bankroll-units-label').textContent = `${Math.round(bankrollUnits).toLocaleString()} bets`;
+            document.getElementById('var-bet-per-hand-label').textContent = `Bet per hand: $${handBet.toFixed(2)} (${coins} coins)`;
+
+            const hours = hands / 600;
+            document.getElementById('var-hands-time-label').textContent = `~${hours.toFixed(1)} Hours @ 600/hr`;
+
+            runMonteCarloSimulation();
+        }
+
+        function setVarianceBankroll(amt) {
+            document.getElementById('var-bankroll-input').value = amt;
+            document.querySelectorAll('#tab-variance .pill-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === `$${amt.toLocaleString()}`);
+            });
+            handleVarianceParamChange();
+        }
+
+        function syncVarianceHands(val) {
+            val = parseInt(val);
+            document.getElementById('var-hands-slider').value = val;
+            document.getElementById('var-hands-input').value = val;
+            
+            document.querySelectorAll('#tab-variance .pill-group .pill-btn').forEach(btn => {
+                const text = btn.textContent;
+                const matches = (val === 600 && text.includes('600')) ||
+                                (val === 2000 && text.includes('2k')) ||
+                                (val === 5000 && text.includes('5k')) ||
+                                (val === 40391 && text.includes('40.4k'));
+                btn.classList.toggle('active', matches);
+            });
+            handleVarianceParamChange();
+        }
+
+        function runMonteCarloSimulation() {
+            const startBankroll = parseFloat(document.getElementById('var-bankroll-input').value) || 1000;
+            const denom = parseFloat(document.getElementById('var-denom-select').value) || 0.25;
+            const coins = parseInt(document.getElementById('var-coins-select').value) || 5;
+            const hands = parseInt(document.getElementById('var-hands-input').value) || 2000;
+            const handBet = denom * coins;
+
+            const evMultiplier = coins === 5 ? EV_5COIN : 0.981821;
+            const netDriftPerBet = evMultiplier - 1.0;
+            const varPerBet = coins === 5 ? VAR_5COIN : 5.24376;
+            const stdPerBet = Math.sqrt(varPerBet);
+
+            const numRuns = 5000;
+            const endingBalances = new Float64Array(numRuns);
+            const netProfits = new Float64Array(numRuns);
+            const royalCounts = new Int32Array(numRuns);
+            let ruinedCount = 0;
+            let profitCount = 0;
+
+            const payouts = JOB_PAYOUT_SPECTRUM.map(p => coins === 5 ? p.multiplier : (p.id === 'ROYAL_FLUSH' ? 250 : p.multiplier));
+            const probs = JOB_PAYOUT_SPECTRUM.map(p => p.prob);
+
+            for (let r = 0; r < numRuns; r++) {
+                let remN = hands;
+                let remP = 1.0;
+                let totPayout = 0;
+                let rCount = 0;
+
+                for (let k = 0; k < payouts.length - 1; k++) {
+                    const pCond = Math.min(1.0, probs[k] / remP);
+                    const count = sampleBinomial(remN, pCond);
+                    totPayout += count * payouts[k];
+                    if (k === 0) rCount = count;
+                    remN -= count;
+                    remP -= probs[k];
+                    if (remN <= 0) break;
+                }
+
+                const netUnits = totPayout - hands;
+                const netDollars = netUnits * handBet;
+                const endBalance = startBankroll + netDollars;
+
+                endingBalances[r] = endBalance;
+                netProfits[r] = netDollars;
+                royalCounts[r] = rCount;
+
+                if (endBalance <= 0) ruinedCount++;
+                if (netDollars > 0) profitCount++;
+            }
+
+            const sortedBalances = Float64Array.from(endingBalances).sort();
+            const sortedProfits = Float64Array.from(netProfits).sort();
+
+            const expectedNetDollars = hands * netDriftPerBet * handBet;
+            const sessionStdDollars = stdPerBet * Math.sqrt(hands) * handBet;
+            const rorAnalytical = calculateRuinProbability(startBankroll / handBet, hands, -0.024369, STD_NO_ROYAL);
+            const rorDisplay = Math.max(ruinedCount / numRuns, rorAnalytical);
+
+            const pProfit = (profitCount / numRuns) * 100;
+            const medianBalance = sortedBalances[Math.floor(numRuns * 0.5)];
+            const medianProfit = sortedProfits[Math.floor(numRuns * 0.5)];
+            const pRoyalAtLeastOne = (1 - Math.pow(1 - 0.00002476, hands)) * 100;
+
+            document.getElementById('var-stat-ev').textContent = (expectedNetDollars >= 0 ? '+$' : '-$') + Math.abs(expectedNetDollars).toFixed(2);
+            document.getElementById('var-stat-ev-pct').textContent = `${(evMultiplier * 100).toFixed(2)}% Return`;
+
+            document.getElementById('var-stat-std').textContent = `±$${sessionStdDollars.toFixed(2)}`;
+            document.getElementById('var-stat-std-units').textContent = `±${(stdPerBet * Math.sqrt(hands)).toFixed(1)} bets`;
+
+            const rorPct = rorDisplay * 100;
+            const rorEl = document.getElementById('var-stat-ror');
+            rorEl.textContent = rorPct < 0.01 ? '<0.01%' : `${rorPct.toFixed(2)}%`;
+            rorEl.style.color = rorPct > 15 ? 'var(--danger)' : (rorPct > 3 ? 'var(--primary)' : 'var(--success)');
+
+            document.getElementById('var-stat-profit-prob').textContent = `${pProfit.toFixed(1)}%`;
+            document.getElementById('var-stat-median').textContent = (medianProfit >= 0 ? '+$' : '-$') + Math.abs(medianProfit).toFixed(2);
+            document.getElementById('var-stat-median-pct').textContent = `Ending: $${medianBalance.toFixed(2)}`;
+
+            document.getElementById('var-stat-royal-prob').textContent = `${pRoyalAtLeastOne.toFixed(2)}%`;
+            const royalOdds = pRoyalAtLeastOne > 0 ? (100 / pRoyalAtLeastOne).toFixed(1) : '∞';
+            document.getElementById('var-stat-royal-desc').textContent = `1 in ${royalOdds} sessions`;
+
+            const p5 = sortedBalances[Math.floor(numRuns * 0.05)];
+            const p95 = sortedBalances[Math.floor(numRuns * 0.95)];
+            document.getElementById('var-dist-ci-label').textContent = `95% CI: $${Math.max(0, p5).toFixed(2)} — $${p95.toFixed(2)}`;
+
+            varSimResults = {
+                startBankroll,
+                denom,
+                coins,
+                hands,
+                handBet,
+                expectedNetDollars,
+                sessionStdDollars,
+                sortedBalances,
+                sortedProfits,
+                numRuns,
+                p5,
+                p25: sortedBalances[Math.floor(numRuns * 0.25)],
+                p50: medianBalance,
+                p75: sortedBalances[Math.floor(numRuns * 0.75)],
+                p95,
+                p99: sortedBalances[Math.floor(numRuns * 0.99)],
+                trajectories: generateSampleTrajectories(startBankroll, handBet, hands, 20)
+            };
+
+            renderDistributionChart();
+            renderTrajectoryChart();
+            renderPercentilesTable(varSimResults);
+        }
+
+        function generateSampleTrajectories(startBankroll, handBet, hands, numPaths = 20) {
+            const paths = [];
+            const steps = Math.min(200, hands);
+            const stepSize = Math.max(1, Math.floor(hands / steps));
+
+            const payouts = JOB_PAYOUT_SPECTRUM.map(p => p.multiplier);
+            const probs = JOB_PAYOUT_SPECTRUM.map(p => p.prob);
+
+            for (let p = 0; p < numPaths; p++) {
+                const points = [{ hand: 0, balance: startBankroll, royal: false }];
+                let currentBal = startBankroll;
+                let handCount = 0;
+
+                while (handCount < hands) {
+                    const batch = Math.min(stepSize, hands - handCount);
+                    let remN = batch;
+                    let remP = 1.0;
+                    let batchPayout = 0;
+                    let hitRoyal = false;
+
+                    for (let k = 0; k < payouts.length - 1; k++) {
+                        const pCond = Math.min(1.0, probs[k] / remP);
+                        const count = sampleBinomial(remN, pCond);
+                        batchPayout += count * payouts[k];
+                        if (k === 0 && count > 0) hitRoyal = true;
+                        remN -= count;
+                        remP -= probs[k];
+                        if (remN <= 0) break;
+                    }
+
+                    const net = (batchPayout - batch) * handBet;
+                    currentBal += net;
+                    handCount += batch;
+
+                    points.push({
+                        hand: handCount,
+                        balance: Math.max(0, currentBal),
+                        royal: hitRoyal
+                    });
+
+                    if (currentBal <= 0 && p > 2) {
+                        points.push({ hand: hands, balance: 0, royal: false });
+                        break;
+                    }
+                }
+                paths.push(points);
+            }
+            return paths;
+        }
+
+        // --- 7. CANVAS VISUALIZER 1: RETURN DISTRIBUTION ---
+        function renderDistributionChart() {
+            if (!varSimResults) return;
+            const canvas = document.getElementById('canvas-distribution');
+            if (!canvas) return;
+            const ctx = setupCanvas(canvas);
+            if (!ctx) return;
+
+            const { width, height } = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, width, height);
+
+            const { sortedBalances, startBankroll, p5, p25, p50, p75, p95, expectedNetDollars, handBet, hands } = varSimResults;
+            const showNoRoyal = document.getElementById('var-show-no-royal-toggle').checked;
+
+            const padding = { top: 30, right: 30, bottom: 40, left: 55 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            const minX = Math.max(0, Math.min(p5 * 0.85, startBankroll * 0.5));
+            const maxX = Math.max(p95 * 1.15, startBankroll + 4000 * (handBet / 5) * 0.6);
+
+            const numBins = 45;
+            const binWidth = (maxX - minX) / numBins;
+            const bins = new Float32Array(numBins);
+
+            for (let i = 0; i < sortedBalances.length; i++) {
+                const val = sortedBalances[i];
+                if (val >= minX && val <= maxX) {
+                    const binIdx = Math.min(numBins - 1, Math.floor((val - minX) / binWidth));
+                    bins[binIdx]++;
+                }
+            }
+
+            let maxCount = 0;
+            for (let b = 0; b < numBins; b++) {
+                if (bins[b] > maxCount) maxCount = bins[b];
+            }
+            if (maxCount === 0) maxCount = 1;
+
+            const scaleX = val => padding.left + ((val - minX) / (maxX - minX)) * chartW;
+            const scaleY = count => padding.top + chartH - (count / maxCount) * chartH;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartW, y);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Histogram Bars
+            for (let b = 0; b < numBins; b++) {
+                const count = bins[b];
+                if (count === 0) continue;
+
+                const binVal = minX + (b + 0.5) * binWidth;
+                const x = scaleX(minX + b * binWidth);
+                const barW = Math.max(2, (binWidth / (maxX - minX)) * chartW - 1.5);
+                const y = scaleY(count);
+                const barH = padding.top + chartH - y;
+
+                let fillStyle;
+                if (binVal < startBankroll) {
+                    fillStyle = 'rgba(248, 113, 113, 0.65)';
+                } else if (binVal >= startBankroll + 3000 * (handBet / 5)) {
+                    fillStyle = 'rgba(251, 191, 36, 0.85)';
+                } else {
+                    fillStyle = 'rgba(74, 222, 128, 0.7)';
+                }
+
+                ctx.fillStyle = fillStyle;
+                ctx.fillRect(x, y, barW, barH);
+            }
+
+            // Without Royal Theoretical Curve
+            if (showNoRoyal) {
+                const meanNoRoyalDollars = startBankroll + (hands * (EV_NO_ROYAL - 1.0) * handBet);
+                const stdNoRoyalDollars = STD_NO_ROYAL * Math.sqrt(hands) * handBet;
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([5, 3]);
+
+                for (let px = 0; px <= chartW; px += 2) {
+                    const xVal = minX + (px / chartW) * (maxX - minX);
+                    const z = (xVal - meanNoRoyalDollars) / stdNoRoyalDollars;
+                    const pdf = (1.0 / (stdNoRoyalDollars * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+                    const estCount = pdf * binWidth * sortedBalances.length;
+                    const yPos = scaleY(estCount);
+
+                    if (px === 0) ctx.moveTo(padding.left + px, yPos);
+                    else ctx.lineTo(padding.left + px, yPos);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Reference Lines
+            const startX = scaleX(startBankroll);
+            if (startX >= padding.left && startX <= padding.left + chartW) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(startX, padding.top);
+                ctx.lineTo(startX, padding.top + chartH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawPillTag(ctx, startX, padding.top - 8, 'Start: $' + Math.round(startBankroll), '#ffffff', '#151b23');
+            }
+
+            const evBankroll = startBankroll + expectedNetDollars;
+            const evX = scaleX(evBankroll);
+            if (evX >= padding.left && evX <= padding.left + chartW) {
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(evX, padding.top);
+                ctx.lineTo(evX, padding.top + chartH);
+                ctx.stroke();
+
+                drawPillTag(ctx, evX, padding.top + 14, 'EV: $' + Math.round(evBankroll), '#fbbf24', '#151b23');
+            }
+
+            const medX = scaleX(p50);
+            if (medX >= padding.left && medX <= padding.left + chartW && Math.abs(medX - evX) > 25) {
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(medX, padding.top);
+                ctx.lineTo(medX, padding.top + chartH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawPillTag(ctx, medX, padding.top + 34, 'Median: $' + Math.round(p50), '#38bdf8', '#151b23');
+            }
+
+            // X-Axis Labels
+            ctx.fillStyle = '#8b949e';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 5; i++) {
+                const val = minX + (i / 5) * (maxX - minX);
+                const x = padding.left + (i / 5) * chartW;
+                ctx.fillText('$' + Math.round(val).toLocaleString(), x, padding.top + chartH + 20);
+            }
+
+            // Y-Axis Label
+            ctx.save();
+            ctx.translate(14, padding.top + chartH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('Probability Density', 0, 0);
+            ctx.restore();
+        }
+
+        // --- 8. CANVAS VISUALIZER 2: MONTE CARLO TRAJECTORIES (FAN CHART) ---
+        function renderTrajectoryChart() {
+            if (!varSimResults) return;
+            const canvas = document.getElementById('canvas-trajectories');
+            if (!canvas) return;
+            const ctx = setupCanvas(canvas);
+            if (!ctx) return;
+
+            const { width, height } = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, width, height);
+
+            const { trajectories, startBankroll, hands, handBet, expectedNetDollars, p5, p95 } = varSimResults;
+            const padding = { top: 30, right: 30, bottom: 40, left: 60 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            const minBal = 0;
+            const maxBal = Math.max(startBankroll * 1.5, p95 * 1.1, startBankroll + 4000 * (handBet / 5) * 0.8);
+
+            const scaleX = h => padding.left + (h / hands) * chartW;
+            const scaleY = b => padding.top + chartH - ((Math.min(maxBal, Math.max(0, b)) - minBal) / (maxBal - minBal)) * chartH;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            for (let i = 0; i <= 4; i++) {
+                const bVal = minBal + (i / 4) * (maxBal - minBal);
+                const y = scaleY(bVal);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartW, y);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Ruin Line
+            const ruinY = scaleY(0);
+            ctx.strokeStyle = '#f87171';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, ruinY);
+            ctx.lineTo(padding.left + chartW, ruinY);
+            ctx.stroke();
+
+            // Start Bankroll Baseline
+            const startY = scaleY(startBankroll);
+            ctx.strokeStyle = '#8b949e';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(padding.left, startY);
+            ctx.lineTo(padding.left + chartW, startY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Expected Value Line
+            const endEvY = scaleY(startBankroll + expectedNetDollars);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(scaleX(0), startY);
+            ctx.lineTo(scaleX(hands), endEvY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Shaded 5th-95th Percentile Fan
+            ctx.beginPath();
+            const upperY = scaleY(p95);
+            const lowerY = scaleY(Math.max(0, p5));
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+            ctx.moveTo(scaleX(0), startY);
+            ctx.lineTo(scaleX(hands), upperY);
+            ctx.lineTo(scaleX(hands), lowerY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Sample Paths
+            trajectories.forEach((path, idx) => {
+                ctx.beginPath();
+                ctx.strokeStyle = idx === 0 ? '#38bdf8' : 'rgba(230, 237, 243, 0.22)';
+                ctx.lineWidth = idx === 0 ? 2.5 : 1;
+
+                path.forEach((pt, i) => {
+                    const x = scaleX(pt.hand);
+                    const y = scaleY(pt.balance);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                path.forEach(pt => {
+                    if (pt.royal) {
+                        const rx = scaleX(pt.hand);
+                        const ry = scaleY(pt.balance);
+                        drawStar(ctx, rx, ry, 5, 8, 4, '#fbbf24');
+                    }
+                });
+            });
+
+            // Axis labels
+            ctx.fillStyle = '#8b949e';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 4; i++) {
+                const hVal = Math.round((i / 4) * hands);
+                const x = padding.left + (i / 4) * chartW;
+                ctx.fillText(hVal.toLocaleString() + ' hands', x, padding.top + chartH + 20);
+            }
+
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const bVal = minBal + (i / 4) * (maxBal - minBal);
+                const y = scaleY(bVal);
+                ctx.fillText('$' + Math.round(bVal).toLocaleString(), padding.left - 8, y + 4);
+            }
+        }
+
+        function animateSamplePath() {
+            if (!varSimResults) return;
+            const canvas = document.getElementById('canvas-trajectories');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const { startBankroll, handBet, hands } = varSimResults;
+
+            const singlePath = generateSampleTrajectories(startBankroll, handBet, hands, 1)[0];
+            let currentStep = 0;
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            function step() {
+                renderTrajectoryChart();
+                const { width, height } = canvas.getBoundingClientRect();
+                const padding = { top: 30, right: 30, bottom: 40, left: 60 };
+                const chartW = width - padding.left - padding.right;
+                const chartH = height - padding.top - padding.bottom;
+                const maxBal = Math.max(startBankroll * 1.5, varSimResults.p95 * 1.1);
+
+                const scaleX = h => padding.left + (h / hands) * chartW;
+                const scaleY = b => padding.top + chartH - ((Math.min(maxBal, Math.max(0, b))) / maxBal) * chartH;
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#4ade80';
+                ctx.lineWidth = 3.5;
+
+                for (let i = 0; i <= currentStep && i < singlePath.length; i++) {
+                    const pt = singlePath[i];
+                    const x = scaleX(pt.hand);
+                    const y = scaleY(pt.balance);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                if (currentStep < singlePath.length) {
+                    const curPt = singlePath[currentStep];
+                    const cx = scaleX(curPt.hand);
+                    const cy = scaleY(curPt.balance);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    currentStep++;
+                    animationFrameId = requestAnimationFrame(step);
+                }
+            }
+            step();
+        }
+
+        // --- 9. TAB 1 PERCENTILES & PAYTABLE VARIANCE TABLES ---
+        function renderPercentilesTable(sim) {
+            const table = document.getElementById('var-percentiles-table');
+            if (!table) return;
+
+            const pTable = [
+                { p: '1st (Worst 1%)', val: sim.sortedBalances[Math.floor(sim.numRuns * 0.01)], desc: 'Catastrophic downswing without quads or high payouts' },
+                { p: '5th (Downside)', val: sim.p5, desc: 'Severe cold run; base game negative drift dominant' },
+                { p: '10th (Cold)', val: sim.sortedBalances[Math.floor(sim.numRuns * 0.10)], desc: 'Below average outcomes with low royal/quad frequency' },
+                { p: '25th (Lower Q)', val: sim.p25, desc: 'Typical cold session with standard base returns' },
+                { p: '50th (Median)', val: sim.p50, desc: 'Median outcome without Royal Flush jackpot' },
+                { p: 'EV (Mean)', val: sim.startBankroll + sim.expectedNetDollars, desc: 'Exact mathematical expected value (99.54% return)' },
+                { p: '75th (Upper Q)', val: sim.p75, desc: 'Winning session fueled by frequent 4-of-a-kinds & full houses' },
+                { p: '90th (Hot Run)', val: sim.sortedBalances[Math.floor(sim.numRuns * 0.90)], desc: 'Excellent session with multiple quads or early straight flush' },
+                { p: '95th (Jackpot)', val: sim.p95, desc: 'Top tier session; typically includes 1 Royal Flush jackpot' },
+                { p: '99th (Best 1%)', val: sim.p99, desc: 'Dream run with 1+ Royal Flushes and multiple high quads' }
+            ];
+
+            let html = `
+                <tr>
+                    <th>Percentile Tier</th>
+                    <th>Ending Bankroll</th>
+                    <th>Net Profit / Loss</th>
+                    <th>Return Rate</th>
+                    <th>Outcome Context</th>
+                </tr>
+            `;
+
+            const totalWagered = sim.hands * sim.handBet;
+
+            pTable.forEach(row => {
+                const net = row.val - sim.startBankroll;
+                const retPct = ((totalWagered + net) / totalWagered) * 100;
+                const netColor = net >= 0 ? 'var(--success)' : 'var(--danger)';
+                const isHighlight = row.p.includes('Median') || row.p.includes('EV');
+
+                html += `
+                    <tr style="${isHighlight ? 'background:rgba(251, 191, 36, 0.08); font-weight:600;' : ''}">
+                        <td class="mono" style="${isHighlight ? 'color:var(--primary)' : ''}">${row.p}</td>
+                        <td class="mono">$${Math.max(0, row.val).toFixed(2)}</td>
+                        <td class="mono" style="color:${netColor}">${(net >= 0 ? '+' : '')}$${net.toFixed(2)}</td>
+                        <td class="mono">${retPct.toFixed(2)}%</td>
+                        <td style="color:var(--text-muted); font-size:0.82rem;">${row.desc}</td>
+                    </tr>
+                `;
+            });
+            table.innerHTML = html;
+        }
+
+        function renderPaytableVarianceDecomposition() {
+            const table = document.getElementById('var-paytable-variance-table');
+            if (!table) return;
+
+            let html = `
+                <tr>
+                    <th>Hand</th>
+                    <th>Payout (x)</th>
+                    <th>Probability</th>
+                    <th>Hit Frequency</th>
+                    <th>EV Contribution</th>
+                    <th>Variance Contribution</th>
+                </tr>
+            `;
+
+            let sumEV = 0;
+            let sumVarContrib = 0;
+
+            JOB_PAYOUT_SPECTRUM.forEach(item => {
+                const evCont = item.multiplier * item.prob;
+                const varCont = (Math.pow(item.multiplier, 2) * item.prob);
+                sumEV += evCont;
+                sumVarContrib += varCont;
+                const varPct = (varCont / 20.506632) * 100;
+
+                html += `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td class="mono">${item.multiplier}:1</td>
+                        <td class="mono">${(item.prob * 100).toFixed(4)}%</td>
+                        <td class="mono" style="color:var(--text-muted)">${item.hitRatio}</td>
+                        <td class="mono" style="color:var(--primary)">+${(evCont * 100).toFixed(4)}%</td>
+                        <td class="mono" style="color:var(--secondary)">${varCont.toFixed(4)} (${varPct.toFixed(1)}%)</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                <tr style="background:var(--surface-elevated); font-weight:bold;">
+                    <td>TOTAL</td>
+                    <td>-</td>
+                    <td class="mono">100.00%</td>
+                    <td>-</td>
+                    <td class="mono" style="color:var(--primary)">${(sumEV * 100).toFixed(4)}%</td>
+                    <td class="mono" style="color:var(--secondary)">σ² = ${VAR_5COIN.toFixed(4)} (σ = ${STD_5COIN.toFixed(4)})</td>
+                </tr>
+            `;
+            table.innerHTML = html;
+        }
+
+        // --- 10. TAB 2: OPTIMAL BANKROLL & EV CONVERGENCE ENGINE ---
+        function initOptimalBankrollTab() {
+            renderDynamicBankrollControls();
+            renderBankrollMatrixTable();
+            handleBankrollParamChange();
+        }
+
+        function setBankrollGoal(goal) {
+            optGoal = goal;
+            document.querySelectorAll('#bankroll-mode-pills .pill-btn').forEach(btn => {
+                const text = btn.textContent;
+                const matches = (goal === 'session' && text.includes('Trip')) ||
+                                (goal === 'convergence' && text.includes('Convergence')) ||
+                                (goal === 'royal' && text.includes('Royal')) ||
+                                (goal === 'advantage' && text.includes('Advantage'));
+                btn.classList.toggle('active', matches);
+            });
+            renderDynamicBankrollControls();
+            handleBankrollParamChange();
+        }
+
+        function renderDynamicBankrollControls() {
+            const ctrl1 = document.getElementById('opt-dynamic-ctrl-1');
+            const ctrl2 = document.getElementById('opt-dynamic-ctrl-2');
+
+            if (optGoal === 'session') {
+                ctrl1.innerHTML = `
+                    <label class="input-label">Session Duration (Hours)</label>
+                    <select id="opt-session-hours" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="2">2 Hours (Quick Session)</option>
+                        <option value="4" selected>4 Hours (Half Day)</option>
+                        <option value="8">8 Hours (Full Day)</option>
+                        <option value="16">16 Hours (Weekend / 2 Days)</option>
+                        <option value="30">30 Hours (Vegas Trip / 4 Days)</option>
+                    </select>
+                `;
+                ctrl2.innerHTML = `
+                    <label class="input-label">Target Survival Rate</label>
+                    <select id="opt-survival-rate" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.90">90% Survival (10% Risk of Ruin)</option>
+                        <option value="0.95" selected>95% Survival (5% Risk of Ruin)</option>
+                        <option value="0.99">99% Survival (1% Risk of Ruin)</option>
+                        <option value="0.999">99.9% Survival (0.1% Risk of Ruin)</option>
+                    </select>
+                `;
+            } else if (optGoal === 'convergence') {
+                ctrl1.innerHTML = `
+                    <label class="input-label">Target EV Accuracy Band (±%)</label>
+                    <select id="opt-ev-tolerance" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.03">±3.0% of EV (~83k hands)</option>
+                        <option value="0.02">±2.0% of EV (~187k hands)</option>
+                        <option value="0.01" selected>±1.0% of EV (~750k hands)</option>
+                        <option value="0.005">±0.5% of EV (~3.0M hands)</option>
+                    </select>
+                `;
+                ctrl2.innerHTML = `
+                    <label class="input-label">Statistical Confidence Level</label>
+                    <select id="opt-conv-confidence" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.90">90% Confidence (Z = 1.645)</option>
+                        <option value="0.95" selected>95% Confidence (Z = 1.960)</option>
+                        <option value="0.99">99% Confidence (Z = 2.576)</option>
+                    </select>
+                `;
+            } else if (optGoal === 'royal') {
+                ctrl1.innerHTML = `
+                    <label class="input-label">Royal Cycles to Survive</label>
+                    <select id="opt-royal-cycles" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.5">0.5 Cycle (20,195 hands — 39% chance)</option>
+                        <option value="1.0" selected>1.0 Cycle (40,391 hands — 63% chance)</option>
+                        <option value="2.0">2.0 Cycles (80,782 hands — 86% chance)</option>
+                        <option value="3.0">3.0 Cycles (121,173 hands — 95% chance)</option>
+                        <option value="4.0">4.0 Cycles (161,564 hands — 98% chance)</option>
+                    </select>
+                `;
+                ctrl2.innerHTML = `
+                    <label class="input-label">Drought Severity Confidence</label>
+                    <select id="opt-royal-conf" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.90">90% Confidence</option>
+                        <option value="0.95" selected>95% Standard Confidence</option>
+                        <option value="0.99">99% Worst-Case Cushion</option>
+                    </select>
+                `;
+            } else if (optGoal === 'advantage') {
+                ctrl1.innerHTML = `
+                    <label class="input-label">Casino Comps / Cashback Rate</label>
+                    <select id="opt-cashback-rate" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="0.003">0.30% Comps (99.84% Total Return)</option>
+                        <option value="0.005">0.50% Comps (100.04% +EV Breakeven)</option>
+                        <option value="0.008" selected>0.80% Comps (100.34% +EV Advantage)</option>
+                        <option value="0.012">1.20% Comps (100.74% Strong +EV)</option>
+                        <option value="0.020">2.00% Comps (101.54% Promo/Bonus)</option>
+                    </select>
+                `;
+                ctrl2.innerHTML = `
+                    <label class="input-label">Advantage Sizing Criterion</label>
+                    <select id="opt-kelly-criterion" class="form-control" onchange="handleBankrollParamChange()">
+                        <option value="half" selected>Half-Kelly (Industry Gold Standard)</option>
+                        <option value="full">Full Kelly (Aggressive Growth)</option>
+                        <option value="quarter">Quarter-Kelly (Ultra Conservative)</option>
+                    </select>
+                `;
+            }
+        }
+
+        function handleBankrollParamChange() {
+            const denom = parseFloat(document.getElementById('opt-denom-select').value) || 0.25;
+            const speed = parseInt(document.getElementById('opt-speed-select').value) || 600;
+            const handBet = denom * 5;
+
+            document.getElementById('opt-bet-display').textContent = `$${handBet.toFixed(2)} per hand (5 coins)`;
+            document.getElementById('opt-speed-label').textContent = `${speed} hands/hr`;
+
+            let targetHands = 2400;
+            let reqSafeBets = 0, reqRecBets = 0, reqProBets = 0;
+            let netEVRate = EV_5COIN - 1.0;
+            let totalCoinIn = 0;
+
+            if (optGoal === 'session') {
+                const hours = parseFloat(document.getElementById('opt-session-hours')?.value || 4);
+                targetHands = hours * speed;
+                
+                reqSafeBets = Math.ceil(normalInv(0.90) * STD_NO_ROYAL * Math.sqrt(targetHands) + targetHands * 0.024369);
+                reqRecBets = Math.ceil(normalInv(0.95) * STD_NO_ROYAL * Math.sqrt(targetHands) + targetHands * 0.024369);
+                reqProBets = Math.ceil(normalInv(0.99) * STD_NO_ROYAL * Math.sqrt(targetHands) + targetHands * 0.024369);
+
+            } else if (optGoal === 'convergence') {
+                const tolerance = parseFloat(document.getElementById('opt-ev-tolerance')?.value || 0.01);
+                const conf = parseFloat(document.getElementById('opt-conv-confidence')?.value || 0.95);
+                const z = normalInv(1.0 - (1.0 - conf) / 2.0);
+
+                targetHands = Math.ceil(Math.pow((z * STD_5COIN) / tolerance, 2));
+
+                reqSafeBets = Math.ceil(normalInv(0.90) * STD_5COIN * Math.sqrt(targetHands) + targetHands * Math.abs(netEVRate));
+                reqRecBets = Math.ceil(normalInv(0.95) * STD_5COIN * Math.sqrt(targetHands) + targetHands * Math.abs(netEVRate));
+                reqProBets = Math.ceil(normalInv(0.99) * STD_5COIN * Math.sqrt(targetHands) + targetHands * Math.abs(netEVRate));
+
+            } else if (optGoal === 'royal') {
+                const cycles = parseFloat(document.getElementById('opt-royal-cycles')?.value || 1.0);
+                targetHands = Math.round(cycles * 40391);
+
+                const droughtLoss = targetHands * 0.024369;
+                reqSafeBets = Math.ceil(droughtLoss + normalInv(0.90) * STD_NO_ROYAL * Math.sqrt(targetHands));
+                reqRecBets = Math.ceil(droughtLoss + normalInv(0.95) * STD_NO_ROYAL * Math.sqrt(targetHands));
+                reqProBets = Math.ceil(droughtLoss + normalInv(0.99) * STD_NO_ROYAL * Math.sqrt(targetHands));
+
+            } else if (optGoal === 'advantage') {
+                const cashback = parseFloat(document.getElementById('opt-cashback-rate')?.value || 0.008);
+                const netEdge = (EV_5COIN + cashback) - 1.0;
+                netEVRate = netEdge;
+                targetHands = 40391;
+
+                if (netEdge > 0) {
+                    const fullKellyBets = VAR_5COIN / netEdge;
+                    reqSafeBets = Math.ceil(fullKellyBets * 0.5);
+                    reqRecBets = Math.ceil(fullKellyBets * 1.0);
+                    reqProBets = Math.ceil(fullKellyBets * 2.0);
+                } else {
+                    reqSafeBets = 1000; reqRecBets = 1500; reqProBets = 2500;
+                }
+            }
+
+            lastConvergenceTargetHands = targetHands;
+            totalCoinIn = targetHands * handBet;
+            const expectedNet = totalCoinIn * netEVRate;
+            const expectedRoyals = targetHands / 40391;
+            const totalHours = targetHands / speed;
+
+            const safeDollars = reqSafeBets * handBet;
+            const recDollars = reqRecBets * handBet;
+            const proDollars = reqProBets * handBet;
+
+            document.getElementById('opt-tier-safe-amt').textContent = `$${Math.round(safeDollars).toLocaleString()}`;
+            document.getElementById('opt-tier-safe-units').textContent = `${reqSafeBets.toLocaleString()} Max Bets (${(reqSafeBets*5).toLocaleString()} Coins)`;
+
+            document.getElementById('opt-tier-rec-amt').textContent = `$${Math.round(recDollars).toLocaleString()}`;
+            document.getElementById('opt-tier-rec-units').textContent = `${reqRecBets.toLocaleString()} Max Bets (${(reqRecBets*5).toLocaleString()} Coins)`;
+
+            document.getElementById('opt-tier-pro-amt').textContent = `$${Math.round(proDollars).toLocaleString()}`;
+            document.getElementById('opt-tier-pro-units').textContent = `${reqProBets.toLocaleString()} Max Bets (${(reqProBets*5).toLocaleString()} Coins)`;
+
+            document.getElementById('opt-stat-coin-in').textContent = `$${Math.round(totalCoinIn).toLocaleString()}`;
+            document.getElementById('opt-stat-hands-sub').textContent = `${targetHands.toLocaleString()} Hands`;
+
+            const netEl = document.getElementById('opt-stat-net-cost');
+            netEl.textContent = (expectedNet >= 0 ? '+$' : '-$') + Math.abs(expectedNet).toFixed(2);
+            netEl.style.color = expectedNet >= 0 ? 'var(--success)' : 'var(--primary)';
+
+            document.getElementById('opt-stat-net-pct').textContent = `${(netEVRate * 100 >= 0 ? '+' : '')}${(netEVRate * 100).toFixed(3)}% Edge`;
+            document.getElementById('opt-stat-royals-exp').textContent = expectedRoyals.toFixed(2);
+            document.getElementById('opt-stat-time').textContent = totalHours >= 24 ? `${(totalHours/24).toFixed(1)} Days (${totalHours.toFixed(0)}h)` : `${totalHours.toFixed(1)} Hours`;
+
+            renderConvergenceChart(targetHands, handBet);
+            renderRorChart(recDollars, handBet, targetHands);
+        }
+
+        // --- 11. CANVAS VISUALIZER 3: EV CONVERGENCE FUNNEL ---
+        function renderConvergenceChart(targetHands, handBet) {
+            const canvas = document.getElementById('canvas-convergence');
+            if (!canvas) return;
+            const ctx = setupCanvas(canvas);
+            if (!ctx) return;
+
+            const { width, height } = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, width, height);
+
+            const padding = { top: 25, right: 30, bottom: 40, left: 60 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            const minHands = 100;
+            const maxHands = 1000000;
+            const logMin = Math.log10(minHands);
+            const logMax = Math.log10(maxHands);
+
+            const minPct = 80.0;
+            const maxPct = 120.0;
+
+            const scaleX = h => padding.left + ((Math.log10(Math.max(minHands, h)) - logMin) / (logMax - logMin)) * chartW;
+            const scaleY = pct => padding.top + chartH - ((pct - minPct) / (maxPct - minPct)) * chartH;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+
+            [85, 90, 95, 100, 105, 110, 115].forEach(pct => {
+                const y = scaleY(pct);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartW, y);
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+
+            // 3-Sigma Funnel (99.7%)
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
+            for (let px = 0; px <= chartW; px += 3) {
+                const hVal = Math.pow(10, logMin + (px / chartW) * (logMax - logMin));
+                const margin = (3.0 * STD_5COIN / Math.sqrt(hVal)) * 100;
+                const y = scaleY(Math.min(maxPct, 99.5439 + margin));
+                if (px === 0) ctx.moveTo(padding.left + px, y);
+                else ctx.lineTo(padding.left + px, y);
+            }
+            for (let px = chartW; px >= 0; px -= 3) {
+                const hVal = Math.pow(10, logMin + (px / chartW) * (logMax - logMin));
+                const margin = (3.0 * STD_5COIN / Math.sqrt(hVal)) * 100;
+                const y = scaleY(Math.max(minPct, 99.5439 - margin));
+                ctx.lineTo(padding.left + px, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // 2-Sigma Funnel (95.4%)
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+            for (let px = 0; px <= chartW; px += 3) {
+                const hVal = Math.pow(10, logMin + (px / chartW) * (logMax - logMin));
+                const margin = (1.96 * STD_5COIN / Math.sqrt(hVal)) * 100;
+                const y = scaleY(Math.min(maxPct, 99.5439 + margin));
+                if (px === 0) ctx.moveTo(padding.left + px, y);
+                else ctx.lineTo(padding.left + px, y);
+            }
+            for (let px = chartW; px >= 0; px -= 3) {
+                const hVal = Math.pow(10, logMin + (px / chartW) * (logMax - logMin));
+                const margin = (1.96 * STD_5COIN / Math.sqrt(hVal)) * 100;
+                const y = scaleY(Math.max(minPct, 99.5439 - margin));
+                ctx.lineTo(padding.left + px, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // Expected Value Line
+            const evY = scaleY(99.5439);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, evY);
+            ctx.lineTo(padding.left + chartW, evY);
+            ctx.stroke();
+
+            // 100% Breakeven Line
+            const beY = scaleY(100.0);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(padding.left, beY);
+            ctx.lineTo(padding.left + chartW, beY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Target Hands Marker
+            const tx = scaleX(targetHands);
+            if (tx >= padding.left && tx <= padding.left + chartW) {
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(tx, padding.top);
+                ctx.lineTo(tx, padding.top + chartH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const marginAtTarget = (1.96 * STD_5COIN / Math.sqrt(targetHands)) * 100;
+                drawPillTag(ctx, tx, padding.top + 10, `Target: ${targetHands.toLocaleString()} (±${marginAtTarget.toFixed(2)}%)`, '#38bdf8', '#151b23');
+            }
+
+            // Axis labels
+            ctx.fillStyle = '#8b949e';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'center';
+            [100, 1000, 10000, 40391, 100000, 1000000].forEach(hVal => {
+                const x = scaleX(hVal);
+                const label = hVal >= 1000000 ? '1M' : (hVal === 40391 ? '40.4k' : (hVal >= 1000 ? (hVal/1000)+'k' : hVal));
+                ctx.fillText(label, x, padding.top + chartH + 20);
+            });
+
+            ctx.textAlign = 'right';
+            [85, 90, 95, 100, 105, 110, 115].forEach(pct => {
+                const y = scaleY(pct);
+                ctx.fillText(pct + '%', padding.left - 8, y + 4);
+            });
+        }
+
+        // --- 12. CANVAS VISUALIZER 4: RISK OF RUIN VS BANKROLL ---
+        function renderRorChart(currentBankroll, handBet, targetHands) {
+            const canvas = document.getElementById('canvas-ror');
+            if (!canvas) return;
+            const ctx = setupCanvas(canvas);
+            if (!ctx) return;
+
+            const { width, height } = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, width, height);
+
+            const padding = { top: 25, right: 30, bottom: 40, left: 55 };
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            const maxB = Math.max(currentBankroll * 2.0, 3000 * handBet);
+            const scaleX = b => padding.left + (b / maxB) * chartW;
+            const scaleY = ror => padding.top + chartH - ror * chartH;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            [0.0, 0.25, 0.50, 0.75, 1.0].forEach(r => {
+                const y = scaleY(r);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartW, y);
+                ctx.stroke();
+            });
+            ctx.setLineDash([]);
+
+            // RoR Curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+
+            for (let px = 0; px <= chartW; px += 2) {
+                const bVal = (px / chartW) * maxB;
+                const ror = calculateRuinProbability(bVal / handBet, targetHands, -0.024369, STD_NO_ROYAL);
+                const y = scaleY(ror);
+                if (px === 0) ctx.moveTo(padding.left + px, y);
+                else ctx.lineTo(padding.left + px, y);
+            }
+            ctx.stroke();
+
+            // Marker for Current Bankroll
+            const curRor = calculateRuinProbability(currentBankroll / handBet, targetHands, -0.024369, STD_NO_ROYAL);
+            const cx = scaleX(currentBankroll);
+            const cy = scaleY(curRor);
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            drawPillTag(ctx, cx, cy - 14, `$${Math.round(currentBankroll)} (RoR: ${(curRor*100).toFixed(1)}%)`, '#fbbf24', '#151b23');
+
+            // Axis labels
+            ctx.fillStyle = '#8b949e';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 4; i++) {
+                const bVal = (i / 4) * maxB;
+                const x = padding.left + (i / 4) * chartW;
+                ctx.fillText('$' + Math.round(bVal).toLocaleString(), x, padding.top + chartH + 20);
+            }
+
+            ctx.textAlign = 'right';
+            [0.0, 0.25, 0.50, 0.75, 1.0].forEach(r => {
+                const y = scaleY(r);
+                ctx.fillText((r * 100) + '%', padding.left - 8, y + 4);
+            });
+        }
+
+        // --- 13. TAB 2 UNIVERSAL BANKROLL MATRIX TABLE ---
+        function renderBankrollMatrixTable() {
+            const table = document.getElementById('opt-bankroll-matrix-table');
+            if (!table) return;
+
+            const denoms = [
+                { name: 'Nickel ($0.05)', bet: 0.25 },
+                { name: 'Quarter ($0.25)', bet: 1.25 },
+                { name: 'Half-Dollar ($0.50)', bet: 2.50 },
+                { name: 'Dollar ($1.00)', bet: 5.00 },
+                { name: 'Five-Dollar ($5.00)', bet: 25.00 }
+            ];
+
+            const scenarios = [
+                { name: '2-Hour Session', hands: 1200, z: 1.645 },
+                { name: '8-Hour Full Day', hands: 4800, z: 1.96 },
+                { name: 'Weekend (15k hands)', hands: 15000, z: 1.96 },
+                { name: '1 Royal Cycle (40k)', hands: 40391, z: 1.96 },
+                { name: 'Full EV Convergence (±1%)', hands: 749716, z: 1.96 }
+            ];
+
+            let html = `
+                <tr>
+                    <th>Coin Denomination</th>
+                    <th>Hand Bet (5 coins)</th>
+                    <th>2-Hour Trip</th>
+                    <th>Full Day (8h)</th>
+                    <th>Weekend (15k)</th>
+                    <th>1 Cycle (40.4k)</th>
+                    <th class="highlight-col">Full EV Convergence</th>
+                </tr>
+            `;
+
+            denoms.forEach(d => {
+                html += `<tr>
+                    <td><strong>${d.name}</strong></td>
+                    <td class="mono">$${d.bet.toFixed(2)}</td>
+                `;
+
+                scenarios.forEach((sc, i) => {
+                    let reqBets;
+                    if (sc.hands <= 40391) {
+                        reqBets = Math.ceil(sc.z * STD_NO_ROYAL * Math.sqrt(sc.hands) + sc.hands * 0.024369);
+                    } else {
+                        reqBets = Math.ceil(sc.z * STD_5COIN * Math.sqrt(sc.hands) + sc.hands * 0.004561);
+                    }
+                    const dollars = reqBets * d.bet;
+                    html += `<td class="mono ${i === scenarios.length - 1 ? 'highlight-col' : ''}">$${Math.round(dollars).toLocaleString()} <span style="font-size:0.75rem; color:var(--text-muted);">(${reqBets.toLocaleString()} b)</span></td>`;
+                });
+
+                html += `</tr>`;
+            });
+
+            table.innerHTML = html;
+        }
+
+        // --- 14. CANVAS DRAWING HELPERS ---
+        function setupCanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return null;
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            return ctx;
+        }
+
+        function drawPillTag(ctx, x, y, text, color, bgColor) {
+            ctx.font = '10px JetBrains Mono';
+            const metrics = ctx.measureText(text);
+            const w = metrics.width + 12;
+            const h = 18;
+
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(x - w / 2, y - h / 2, w, h, 4);
+            } else {
+                ctx.rect(x - w / 2, y - h / 2, w, h);
+            }
+            ctx.fill();
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y);
+        }
+
+        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // --- 15. INTERACTIVE TOOLTIPS FOR ALL CHARTS ---
+        function setupChartTooltips() {
+            // Chart 1: Distribution Tooltip
+            const wrapDist = document.getElementById('wrapper-distribution');
+            const tipDist = document.getElementById('tooltip-distribution');
+            if (wrapDist && tipDist) {
+                wrapDist.addEventListener('mousemove', e => {
+                    if (!varSimResults) return;
+                    const rect = wrapDist.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const padding = { top: 30, right: 30, bottom: 40, left: 55 };
+                    const chartW = rect.width - padding.left - padding.right;
+                    
+                    if (mouseX < padding.left || mouseX > padding.left + chartW) {
+                        tipDist.style.display = 'none';
+                        return;
+                    }
+
+                    const minX = Math.max(0, Math.min(varSimResults.p5 * 0.85, varSimResults.startBankroll * 0.5));
+                    const maxX = Math.max(varSimResults.p95 * 1.15, varSimResults.startBankroll + 4000 * (varSimResults.handBet / 5) * 0.6);
+                    const val = minX + ((mouseX - padding.left) / chartW) * (maxX - minX);
+                    const net = val - varSimResults.startBankroll;
+                    const retPct = ((varSimResults.hands * varSimResults.handBet + net) / (varSimResults.hands * varSimResults.handBet)) * 100;
+
+                    let status = val < varSimResults.startBankroll ? '🔴 Downside Zone' : (val >= varSimResults.startBankroll + 3000 * (varSimResults.handBet / 5) ? '👑 Royal Flush Zone' : '🟢 Profit Zone');
+
+                    tipDist.innerHTML = `
+                        <div style="color:var(--secondary); font-weight:700;">Bankroll: $${val.toFixed(2)}</div>
+                        <div>Net P/L: <span style="color:${net>=0?'var(--success)':'var(--danger)'}">${net>=0?'+':''}$${net.toFixed(2)} (${retPct.toFixed(2)}%)</span></div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">${status}</div>
+                    `;
+                    tipDist.style.display = 'block';
+                    tipDist.style.left = Math.min(rect.width - 200, Math.max(10, mouseX + 12)) + 'px';
+                    tipDist.style.top = (e.clientY - rect.top - 60) + 'px';
+                });
+
+                wrapDist.addEventListener('mouseleave', () => { tipDist.style.display = 'none'; });
+            }
+
+            // Chart 2: Trajectories Tooltip
+            const wrapTraj = document.getElementById('wrapper-trajectories');
+            const tipTraj = document.getElementById('tooltip-trajectories');
+            if (wrapTraj && tipTraj) {
+                wrapTraj.addEventListener('mousemove', e => {
+                    if (!varSimResults) return;
+                    const rect = wrapTraj.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const padding = { top: 30, right: 30, bottom: 40, left: 60 };
+                    const chartW = rect.width - padding.left - padding.right;
+
+                    if (mouseX < padding.left || mouseX > padding.left + chartW) {
+                        tipTraj.style.display = 'none';
+                        return;
+                    }
+
+                    const handNum = Math.round(((mouseX - padding.left) / chartW) * varSimResults.hands);
+                    const evAtHand = varSimResults.startBankroll + handNum * (EV_5COIN - 1.0) * varSimResults.handBet;
+                    const stdAtHand = STD_5COIN * Math.sqrt(handNum) * varSimResults.handBet;
+
+                    tipTraj.innerHTML = `
+                        <div style="color:var(--primary); font-weight:700;">Hand #${handNum.toLocaleString()}</div>
+                        <div>EV Bankroll: $${evAtHand.toFixed(2)}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">95% Band: ±$${(1.96 * stdAtHand).toFixed(2)}</div>
+                    `;
+                    tipTraj.style.display = 'block';
+                    tipTraj.style.left = Math.min(rect.width - 200, Math.max(10, mouseX + 12)) + 'px';
+                    tipTraj.style.top = (e.clientY - rect.top - 60) + 'px';
+                });
+
+                wrapTraj.addEventListener('mouseleave', () => { tipTraj.style.display = 'none'; });
+            }
+
+            // Chart 3: Convergence Funnel Tooltip
+            const wrapConv = document.getElementById('wrapper-convergence');
+            const tipConv = document.getElementById('tooltip-convergence');
+            if (wrapConv && tipConv) {
+                wrapConv.addEventListener('mousemove', e => {
+                    const rect = wrapConv.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const padding = { top: 25, right: 30, bottom: 40, left: 60 };
+                    const chartW = rect.width - padding.left - padding.right;
+
+                    if (mouseX < padding.left || mouseX > padding.left + chartW) {
+                        tipConv.style.display = 'none';
+                        return;
+                    }
+
+                    const logMin = Math.log10(100);
+                    const logMax = Math.log10(1000000);
+                    const hVal = Math.round(Math.pow(10, logMin + ((mouseX - padding.left) / chartW) * (logMax - logMin)));
+                    const margin = (1.96 * STD_5COIN / Math.sqrt(hVal)) * 100;
+                    const reqBankrollBets = Math.ceil(1.96 * STD_NO_ROYAL * Math.sqrt(hVal) + hVal * 0.024369);
+
+                    tipConv.innerHTML = `
+                        <div style="color:var(--primary); font-weight:700;">${hVal.toLocaleString()} Hands</div>
+                        <div>95% Margin: <span style="color:var(--secondary)">±${margin.toFixed(2)}%</span></div>
+                        <div>EV Range: [${(99.5439 - margin).toFixed(2)}%, ${(99.5439 + margin).toFixed(2)}%]</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Req Bankroll: ~${reqBankrollBets.toLocaleString()} bets</div>
+                    `;
+                    tipConv.style.display = 'block';
+                    tipConv.style.left = Math.min(rect.width - 240, Math.max(10, mouseX + 12)) + 'px';
+                    tipConv.style.top = (e.clientY - rect.top - 70) + 'px';
+                });
+
+                wrapConv.addEventListener('mouseleave', () => { tipConv.style.display = 'none'; });
+            }
+
+            // Chart 4: RoR Tooltip
+            const wrapRor = document.getElementById('wrapper-ror');
+            const tipRor = document.getElementById('tooltip-ror');
+            if (wrapRor && tipRor) {
+                wrapRor.addEventListener('mousemove', e => {
+                    const rect = wrapRor.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const padding = { top: 25, right: 30, bottom: 40, left: 55 };
+                    const chartW = rect.width - padding.left - padding.right;
+
+                    if (mouseX < padding.left || mouseX > padding.left + chartW) {
+                        tipRor.style.display = 'none';
+                        return;
+                    }
+
+                    const denom = parseFloat(document.getElementById('opt-denom-select')?.value || 0.25);
+                    const handBet = denom * 5;
+                    const maxB = Math.max(1000 * handBet * 2.0, 3000 * handBet);
+                    const bVal = ((mouseX - padding.left) / chartW) * maxB;
+                    const ror = calculateRuinProbability(bVal / handBet, lastConvergenceTargetHands, -0.024369, STD_NO_ROYAL);
+
+                    let tierLabel = ror > 0.15 ? '🔴 High Risk' : (ror > 0.05 ? '🟡 Moderate' : (ror > 0.01 ? '🟢 Safe Standard' : '🏰 Ironclad Pro'));
+
+                    tipRor.innerHTML = `
+                        <div style="color:var(--primary); font-weight:700;">Bankroll: $${Math.round(bVal).toLocaleString()} (${Math.round(bVal/handBet)} bets)</div>
+                        <div>Risk of Ruin: <span style="color:${ror>0.1?'var(--danger)':'var(--success)'}">${(ror*100).toFixed(2)}%</span></div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">${tierLabel}</div>
+                    `;
+                    tipRor.style.display = 'block';
+                    tipRor.style.left = Math.min(rect.width - 240, Math.max(10, mouseX + 12)) + 'px';
+                    tipRor.style.top = (e.clientY - rect.top - 60) + 'px';
+                });
+
+                wrapRor.addEventListener('mouseleave', () => { tipRor.style.display = 'none'; });
+            }
+        }
+
+        function handleWindowResize() {
+            renderDistributionChart();
+            renderTrajectoryChart();
+            if (varSimResults) {
+                renderConvergenceChart(varSimResults.hands, varSimResults.handBet);
+                renderRorChart(varSimResults.startBankroll, varSimResults.handBet, varSimResults.hands);
+            }
+        }
+
+        // --- 16. UI INTERACTION HELPERS ---
+        function toggleAccordion(el) {
+            el.parentElement.classList.toggle('open');
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            const tabBtn = document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`);
+            if (tabBtn) tabBtn.classList.add('active');
+            
+            const targetContent = document.getElementById(`tab-${tabId}`);
+            if (targetContent) targetContent.classList.add('active');
+
+            if (tabId === 'variance') {
+                setTimeout(() => {
+                    renderDistributionChart();
+                    renderTrajectoryChart();
+                }, 50);
+            } else if (tabId === 'optimal-bankroll') {
+                setTimeout(() => {
+                    handleBankrollParamChange();
+                }, 50);
+            }
         }
 
         window.onload = init;
