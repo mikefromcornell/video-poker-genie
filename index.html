@@ -45,19 +45,22 @@
 
         header {
             text-align: center;
-            padding: 35px 0 25px 0;
+            padding: 10px 20px;
             background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
             border-bottom: 1px solid var(--border);
-            margin-bottom: 30px;
+            margin-bottom: 0;
         }
+
+        header .container { padding: 0; }
+        .workspace { padding-top: 12px; }
 
         h1 {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 2.8rem;
+            font-size: 1.5rem;
             color: var(--primary);
             text-transform: uppercase;
             letter-spacing: -1px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
             text-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
         }
 
@@ -280,13 +283,30 @@
         .manual-slot.filled { border: none; background: transparent; }
 
         /* Photo hand input */
-        .photo-input-panel { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 28px; }
-        .photo-input-panel h3 { color: var(--secondary); margin-bottom: 8px; }
-        .photo-input-panel p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
-        .photo-input-panel label { display: block; font-weight: 600; margin: 12px 0 5px; }
-        .photo-input-panel input { max-width: 100%; color: var(--text); }
-        .photo-choices { display: flex; gap: 16px; flex-wrap: wrap; }
-        .photo-choices > div { flex: 1 1 220px; min-width: 0; }
+        .solver-board { padding: 16px; }
+        .solver-title { color: var(--primary); font-size: 1.15rem; margin-bottom: 10px; }
+        .photo-input-panel { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+        .photo-choices { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .photo-file-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .photo-choice { background: var(--surface); border: 1px solid var(--border-highlight); border-radius: 8px; color: var(--text); cursor: pointer; font-weight: 600; font-size: 0.88rem; padding: 9px 12px; }
+        .photo-choice:hover { border-color: var(--secondary); }
+        .photo-file-input:focus-visible + .photo-choice { outline: 2px solid var(--secondary); outline-offset: 2px; }
+        .photo-input-panel .btn { font-size: 0.85rem; padding: 9px 14px; }
+        .solver-hand-label { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; }
+        .solver-board .manual-slot-container { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 480px; margin: 0 auto 12px; }
+        .solver-board .manual-slot { width: 100%; height: auto; aspect-ratio: 95 / 135; }
+        .solver-board .manual-slot .card { width: 100%; height: 100%; cursor: pointer; }
+        .solver-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .solver-actions .btn { padding: 10px 20px; }
+        .solver-result { display: none; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); }
+        .solver-result h3 { color: var(--secondary); font-family: 'JetBrains Mono', monospace; margin-bottom: 14px; }
+        .solver-selector { margin-top: 18px; }
+        .solver-selector h3 { color: var(--text); font-size: 0.95rem; margin-bottom: 2px; }
+        .solver-selector p { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 8px; }
+        .solver-selector .card-selector-grid { margin-bottom: 0; }
+        .solver-help { margin-top: 24px; color: var(--text-muted); font-size: 0.9rem; }
+        .solver-help summary { color: var(--secondary); cursor: pointer; font-weight: 600; }
+        .solver-help p { margin-top: 8px; }
         .analysis-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .analysis-table th, .analysis-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
         .analysis-table th:first-child, .analysis-table td:first-child { text-align: left; }
@@ -295,23 +315,24 @@
         .analysis-counter { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 18px; text-align: center; color: var(--text-muted); }
         .analysis-counter strong { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; }
         .analysis-counter p { font-size: 0.8rem; margin-top: 4px; }
-        .photo-preview { display: block; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 15px 0; }
+        .photo-preview { display: block; max-width: 100%; max-height: 100px; border-radius: 8px; margin: 10px 0 0; }
         .photo-preview[hidden] { display: none; }
-        .photo-status { margin-top: 12px; color: var(--text); min-height: 1.6em; }
+        .photo-status { margin-top: 8px; color: var(--text); font-size: 0.9rem; }
+        .photo-status:empty { display: none; }
         .photo-input-panel .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         /* Tabs Navigation */
         .tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 12px;
             overflow-x: auto;
-            padding-bottom: 8px;
+            padding-bottom: 6px;
             scrollbar-width: thin;
         }
 
         .tab {
-            padding: 11px 18px;
+            padding: 8px 12px;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -756,7 +777,13 @@
             .card { width: 56px; height: 86px; padding: 4px; }
             .card .rank { font-size: 0.95rem; }
             .card .suit { font-size: 1.3rem; }
-            h1 { font-size: 1.8rem; }
+            h1 { font-size: 1.3rem; }
+            .workspace { padding: 10px; }
+            .solver-board { padding: 12px; }
+            .solver-board .manual-slot-container { gap: 5px; }
+            .solver-board .manual-slot .card { padding: 5px; }
+            .solver-board .manual-slot .card .rank { font-size: 1rem !important; }
+            .solver-board .manual-slot .card .suit { font-size: 1.25rem !important; }
             .card-selector-grid { grid-template-columns: repeat(7, 1fr); }
             .canvas-wrapper { height: 260px; }
         }
@@ -767,11 +794,10 @@
     <header>
         <div class="container">
             <h1>Video Poker Genie</h1>
-            <p class="subtitle">Mathematical Solver, Variance Visualizer & Bankroll Engine for Jacks or Better</p>
         </div>
     </header>
 
-    <div class="container">
+    <div class="container workspace">
         
         <nav class="tabs">
             <div class="tab active" onclick="switchTab('solver')">📷 Photo & Hand Solver</div>
@@ -1261,28 +1287,23 @@
             </div>
         </div>
 
-        <!-- Manual Solver Tab -->
+        <!-- Photo and hand solver -->
         <div id="tab-solver" class="tab-content active">
-            <div class="game-board">
-                <h2 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Photo & Hand Solver</h2>
-                <p style="margin-bottom: 25px; color: var(--text-muted); text-align: center;">Analyze a photo or pick 5 cards to find the optimal hold for full-pay 9/6 Jacks or Better at five coins.</p>
-
-                <section class="photo-input-panel" aria-labelledby="photo-heading">
-                    <h3 id="photo-heading">📷 Read a hand from a photo</h3>
-                    <p>Upload a clear, tightly cropped photo showing five upright, separated cards with ranks and suits visible. Best with standard playing cards; machine screens and unusual designs may be harder to read.</p>
-                    <p>Free recognition runs on your device; your photo is not uploaded. The model downloads on first use. It can make mistakes, so always verify the cards before analyzing.</p>
+            <div class="game-board solver-board">
+                <h2 class="solver-title">Photo & Hand Solver</h2>
+                <section class="photo-input-panel" aria-label="Read cards from a photo">
                     <div class="photo-choices">
-                        <div><label for="photo-camera">Take a photo</label>
-                            <input id="photo-camera" type="file" accept="image/*" capture="environment" onchange="selectHandPhoto(event)"></div>
-                        <div><label for="photo-file">Or choose a photo</label>
-                            <input id="photo-file" type="file" accept="image/*" onchange="selectHandPhoto(event)"></div>
+                        <input class="photo-file-input" id="photo-camera" type="file" accept="image/*" capture="environment" onchange="selectHandPhoto(event)">
+                        <label class="photo-choice" for="photo-camera">📷 Take photo</label>
+                        <input class="photo-file-input" id="photo-file" type="file" accept="image/*" onchange="selectHandPhoto(event)">
+                        <label class="photo-choice" for="photo-file">Choose photo</label>
+                        <button class="btn btn-solve" id="photo-read-btn" type="button" onclick="readHandPhoto()" disabled>Read cards</button>
                     </div>
                     <img id="photo-preview" class="photo-preview" alt="Selected hand photo preview" hidden>
-                    <div style="margin-top: 16px;"><button class="btn btn-solve" id="photo-read-btn" type="button" onclick="readHandPhoto()" disabled>Read cards</button></div>
                     <div id="photo-status" class="photo-status" role="status" aria-live="polite"></div>
                 </section>
-                <p style="margin-bottom: 15px; color: var(--text-muted); text-align: center;">Verify the five cards below. Click a card to remove it, then select the correct card from the deck.</p>
-                
+
+                <p class="solver-hand-label">Verify all five cards before analyzing.</p>
                 <div class="manual-slot-container" id="manual-slots">
                     <div class="manual-slot"></div>
                     <div class="manual-slot"></div>
@@ -1291,19 +1312,33 @@
                     <div class="manual-slot"></div>
                 </div>
 
-                <div class="card-selector-grid" id="selector-grid">
-                    <!-- 52 cards generated by JS -->
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
+                <div class="solver-actions">
                     <button class="btn btn-deal" id="manual-solve-btn" onclick="solveManualHand()" disabled>Analyze Hand</button>
-                    <button class="btn btn-solve" style="margin-left: 10px;" onclick="resetManualSolver()">Clear All</button>
+                    <button class="btn btn-solve" onclick="resetManualSolver()">Clear All</button>
                 </div>
 
-                <div id="manual-result-panel" style="display: none; margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border);">
-                    <h3 style="color:var(--secondary); font-family:'JetBrains Mono'; margin-bottom: 20px;">🧞 Analysis Result</h3>
+                <div id="manual-result-panel" class="solver-result" aria-live="polite">
+                    <h3>🧞 Analysis Result</h3>
                     <div id="manual-result-content"></div>
                 </div>
+
+                <section class="solver-selector" aria-labelledby="selector-heading">
+                    <h3 id="selector-heading">Select cards manually</h3>
+                    <p>Tap a card above to remove it, then choose a replacement below.</p>
+                    <div class="card-selector-grid" id="selector-grid">
+                        <!-- 52 cards generated by JS -->
+                    </div>
+                    <div class="solver-actions" style="margin-top: 12px;">
+                        <button class="btn btn-deal" id="manual-solve-bottom-btn" onclick="solveManualHand(true)" disabled>Analyze Hand</button>
+                    </div>
+                </section>
+
+                <details class="solver-help">
+                    <summary>Photo tips &amp; how it works</summary>
+                    <p>Use a clear, tightly cropped photo showing five upright, separated cards with ranks and suits visible. Standard playing cards work best; machine screens and unusual designs may be harder to read.</p>
+                    <p>Recognition is free and runs on your device; your photo is not uploaded. The model downloads on first use and can make mistakes, so always verify the cards before analyzing.</p>
+                    <p>The solver recommends holds for full-pay 9/6 Jacks or Better at five coins. Other games and paytables may require different holds.</p>
+                </details>
                 <footer class="analysis-counter">
                     <div>Rounds analyzed: <strong id="rounds-analyzed" aria-live="polite">0</strong></div>
                     <p>Completed hand analyses, including repeats. Saved in this browser when available.</p>
@@ -1959,7 +1994,7 @@
                 if (card) {
                     slot.className = 'manual-slot filled';
                     slot.innerHTML = `
-                        <div class="card ${card.color}" style="width:95px; height:135px; cursor:pointer;" onclick="toggleManualCard('${card.rank}', '${card.suit}')">
+                        <div class="card ${card.color}" onclick="toggleManualCard('${card.rank}', '${card.suit}')">
                             <div class="rank" style="font-size:1.3rem;">${card.rank}</div>
                             <div class="suit" style="font-size:1.7rem;">${card.suit}</div>
                         </div>
@@ -1983,7 +2018,9 @@
                 }
             });
 
-            document.getElementById('manual-solve-btn').disabled = manualHand.length !== 5 || manualSolvePending;
+            const solveDisabled = manualHand.length !== 5 || manualSolvePending;
+            document.getElementById('manual-solve-btn').disabled = solveDisabled;
+            document.getElementById('manual-solve-bottom-btn').disabled = solveDisabled;
         }
 
         function renderSelectorGrid() {
@@ -2018,15 +2055,17 @@
             updateManualUI();
         }
 
-        function solveManualHand() {
+        function solveManualHand(scrollToResult = false) {
             if (manualHand.length !== 5 || manualSolvePending) return;
             manualSolvePending = true;
             updateManualUI();
             const snapshot = manualHand.map(card => ({ ...card }));
             const revision = manualRevision;
             const content = document.getElementById('manual-result-content');
-            document.getElementById('manual-result-panel').style.display = 'block';
+            const resultPanel = document.getElementById('manual-result-panel');
+            resultPanel.style.display = 'block';
             content.innerHTML = "🧞 Genie is calculating all 32 outcomes...";
+            if (scrollToResult) resultPanel.scrollIntoView({ block: 'start' });
             
             setTimeout(() => {
                 try {

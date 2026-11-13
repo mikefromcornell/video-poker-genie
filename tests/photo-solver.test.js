@@ -7,8 +7,13 @@ const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 assert.match(html, /class="tab active" onclick="switchTab\('solver'\)"/);
 assert.match(html, /id="tab-solver" class="tab-content active"/);
 assert.match(html, /id="photo-camera"[^>]*capture="environment"/);
+assert.ok(html.indexOf('id="manual-solve-btn"') < html.indexOf('id="manual-result-panel"'));
+assert.ok(html.indexOf('id="manual-result-panel"') < html.indexOf('id="selector-grid"'));
+assert.ok(html.indexOf('id="selector-grid"') < html.indexOf('class="solver-help"'));
+assert.match(html, /for="photo-camera"/);
+assert.match(html, /for="photo-file"/);
 const elements = {};
-for (const id of ['photo-read-btn', 'photo-preview', 'photo-status', 'manual-result-panel', 'manual-result-content', 'manual-solve-btn', 'rounds-analyzed']) {
+for (const id of ['photo-read-btn', 'photo-preview', 'photo-status', 'manual-result-panel', 'manual-result-content', 'manual-solve-btn', 'manual-solve-bottom-btn', 'rounds-analyzed']) {
     elements[id] = { disabled: false, value: '', textContent: '', innerHTML: '', style: {} };
 }
 elements['manual-slots'] = { children: Array.from({ length: 5 }, () => ({ className: '', innerHTML: '' })) };
@@ -66,6 +71,7 @@ assert.equal(standPat.counts.NOTHING, 1);
     assert.equal(run('manualHand.map(c => c.rank + c.suit).join(" ")'), '10♥ J♥ Q♥ K♥ 2♣');
     assert.match(elements['photo-status'].textContent, /Verify/);
     assert.equal(elements['manual-solve-btn'].disabled, false);
+    assert.equal(elements['manual-solve-bottom-btn'].disabled, false);
     run('CardDetector.detect = async () => cards.slice(0, 4)');
     await run('readHandPhoto()');
     assert.match(elements['photo-status'].textContent, /Found 4 cards/);
@@ -96,7 +102,11 @@ assert.equal(standPat.counts.NOTHING, 1);
     assert.match(elements['manual-result-content'].innerHTML, /2\.1277%/);
     assert.equal(elements['rounds-analyzed'].textContent, '8'); // duplicate clicks count once
     assert.equal(storage.get('videoPokerGenie.roundsAnalyzed'), '8');
-    run('solveManualHand(); manualRevision++'); // stale analysis is cancelled
+    assert.equal(elements['manual-solve-bottom-btn'].disabled, false);
+    let scrolled = false;
+    elements['manual-result-panel'].scrollIntoView = () => { scrolled = true; };
+    run('solveManualHand(true); manualRevision++'); // bottom action reveals the result; stale analysis is cancelled
+    assert.equal(scrolled, true);
     await new Promise(resolve => setTimeout(resolve, 70));
     assert.equal(elements['rounds-analyzed'].textContent, '8');
     run('resetManualSolver(); initAnalysisCounter()');
