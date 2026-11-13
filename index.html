@@ -279,6 +279,27 @@
 
         .manual-slot.filled { border: none; background: transparent; }
 
+        /* Photo hand input */
+        .photo-input-panel { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 28px; }
+        .photo-input-panel h3 { color: var(--secondary); margin-bottom: 8px; }
+        .photo-input-panel p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+        .photo-input-panel label { display: block; font-weight: 600; margin: 12px 0 5px; }
+        .photo-input-panel input { max-width: 100%; color: var(--text); }
+        .photo-choices { display: flex; gap: 16px; flex-wrap: wrap; }
+        .photo-choices > div { flex: 1 1 220px; min-width: 0; }
+        .analysis-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .analysis-table th, .analysis-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+        .analysis-table th:first-child, .analysis-table td:first-child { text-align: left; }
+        .analysis-table th { color: var(--text-muted); }
+        .analysis-scroll { overflow-x: auto; margin-bottom: 22px; }
+        .analysis-counter { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 18px; text-align: center; color: var(--text-muted); }
+        .analysis-counter strong { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; }
+        .analysis-counter p { font-size: 0.8rem; margin-top: 4px; }
+        .photo-preview { display: block; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 15px 0; }
+        .photo-preview[hidden] { display: none; }
+        .photo-status { margin-top: 12px; color: var(--text); min-height: 1.6em; }
+        .photo-input-panel .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
         /* Tabs Navigation */
         .tabs {
             display: flex;
@@ -753,17 +774,17 @@
     <div class="container">
         
         <nav class="tabs">
-            <div class="tab active" onclick="switchTab('play')">🎮 Trainer</div>
+            <div class="tab active" onclick="switchTab('solver')">📷 Photo & Hand Solver</div>
+            <div class="tab" onclick="switchTab('play')">🎮 Trainer</div>
             <div class="tab" onclick="switchTab('variance')">📊 Variance & Returns</div>
             <div class="tab" onclick="switchTab('optimal-bankroll')">🎯 Optimal Bankroll & EV</div>
             <div class="tab" onclick="switchTab('paytable')">📜 Paytable</div>
-            <div class="tab" onclick="switchTab('solver')">🧞 Manual Solver</div>
             <div class="tab" onclick="switchTab('bankroll')">💰 Strategy Rules</div>
             <div class="tab" onclick="switchTab('learn')">📚 Learn Math</div>
         </nav>
 
         <!-- Trainer Tab -->
-        <div id="tab-play" class="tab-content active">
+        <div id="tab-play" class="tab-content">
             <div class="game-board">
                 <div class="cards-container" id="cards-container">
                     <!-- Dynamic cards -->
@@ -1241,10 +1262,26 @@
         </div>
 
         <!-- Manual Solver Tab -->
-        <div id="tab-solver" class="tab-content">
+        <div id="tab-solver" class="tab-content active">
             <div class="game-board">
-                <h2 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Manual Hand Solver</h2>
-                <p style="margin-bottom: 25px; color: var(--text-muted); text-align: center;">Pick 5 cards from the deck to find the mathematically optimal hold.</p>
+                <h2 style="color: var(--primary); margin-bottom: 10px; text-align: center;">Photo & Hand Solver</h2>
+                <p style="margin-bottom: 25px; color: var(--text-muted); text-align: center;">Analyze a photo or pick 5 cards to find the optimal hold for full-pay 9/6 Jacks or Better at five coins.</p>
+
+                <section class="photo-input-panel" aria-labelledby="photo-heading">
+                    <h3 id="photo-heading">📷 Read a hand from a photo</h3>
+                    <p>Upload a clear, tightly cropped photo showing five upright, separated cards with ranks and suits visible. Best with standard playing cards; machine screens and unusual designs may be harder to read.</p>
+                    <p>Free recognition runs on your device; your photo is not uploaded. The model downloads on first use. It can make mistakes, so always verify the cards before analyzing.</p>
+                    <div class="photo-choices">
+                        <div><label for="photo-camera">Take a photo</label>
+                            <input id="photo-camera" type="file" accept="image/*" capture="environment" onchange="selectHandPhoto(event)"></div>
+                        <div><label for="photo-file">Or choose a photo</label>
+                            <input id="photo-file" type="file" accept="image/*" onchange="selectHandPhoto(event)"></div>
+                    </div>
+                    <img id="photo-preview" class="photo-preview" alt="Selected hand photo preview" hidden>
+                    <div style="margin-top: 16px;"><button class="btn btn-solve" id="photo-read-btn" type="button" onclick="readHandPhoto()" disabled>Read cards</button></div>
+                    <div id="photo-status" class="photo-status" role="status" aria-live="polite"></div>
+                </section>
+                <p style="margin-bottom: 15px; color: var(--text-muted); text-align: center;">Verify the five cards below. Click a card to remove it, then select the correct card from the deck.</p>
                 
                 <div class="manual-slot-container" id="manual-slots">
                     <div class="manual-slot"></div>
@@ -1267,6 +1304,10 @@
                     <h3 style="color:var(--secondary); font-family:'JetBrains Mono'; margin-bottom: 20px;">🧞 Analysis Result</h3>
                     <div id="manual-result-content"></div>
                 </div>
+                <footer class="analysis-counter">
+                    <div>Rounds analyzed: <strong id="rounds-analyzed" aria-live="polite">0</strong></div>
+                    <p>Completed hand analyses, including repeats. Saved in this browser when available.</p>
+                </footer>
             </div>
         </div>
 
@@ -1309,6 +1350,8 @@
 
     </div>
 
+    <script src="assets/ort/ort.wasm.min.js"></script>
+    <script src="assets/card-detector.js"></script>
     <script>
         // --- 1. CORE VIDEO POKER CONFIG & EXACT CONSTANTS ---
         const SUITS = ['♠', '♣', '♥', '♦'];
@@ -1373,6 +1416,13 @@
         let startBalance = 1000;
         let stats = { hands: 0, correct: 0 };
         let manualHand = [];
+        let manualSolvePending = false;
+        const ANALYSIS_COUNT_KEY = 'videoPokerGenie.roundsAnalyzed';
+        let roundsAnalyzed = 0;
+        let manualRevision = 0;
+        let photoRevision = 0;
+        let photoData = null;
+        let photoRequest = null;
 
         // State for Variance Tab
         let varSimResults = null;
@@ -1390,6 +1440,7 @@
             renderSelectorGrid();
             updateUI();
             updateManualUI();
+            initAnalysisCounter();
             initVarianceTab();
             initOptimalBankrollTab();
             setupChartTooltips();
@@ -1622,11 +1673,10 @@
             else if (draw === 4) combos = 178365;
             else if (draw === 5) combos = 1533939;
 
-            return `The Genie performed Exhaustive Evaluation on all ${combos.toLocaleString()} possible replacement outcomes. The calculated EV is ${ev.toFixed(4)}, matching the 99.54% optimal strategy return.`;
+            return `The Genie evaluated all ${combos.toLocaleString()} possible replacement outcomes for this hold. The expected payout is ${ev.toFixed(4)} credits on a 5-credit bet.`;
         }
 
         function solveHand(currentHand) {
-            const DISCARD_ALL_EV = 0.3644; 
             const fullDeck = [];
             for (let suit of SUITS) {
                 for (let rank of RANKS) {
@@ -1644,12 +1694,7 @@
                     if ((i >> j) & 1) indices.push(j);
                 }
                 
-                let ev;
-                if (indices.length === 0) {
-                    ev = DISCARD_ALL_EV;
-                } else {
-                    ev = calculateEV(indices, currentHand, remainingDeck);
-                }
+                const ev = calculateEV(indices, currentHand, remainingDeck);
                 combinations.push({ indices, ev });
             }
             return combinations.sort((a, b) => b.ev - a.ev);
@@ -1696,7 +1741,47 @@
                     }
                 }
             }
+            else if (drawCount === 5) {
+                for (let i = 0; i < remainingDeck.length; i++) {
+                    for (let j = i + 1; j < remainingDeck.length; j++) {
+                        for (let k = j + 1; k < remainingDeck.length; k++) {
+                            for (let l = k + 1; l < remainingDeck.length; l++) {
+                                for (let m = l + 1; m < remainingDeck.length; m++) {
+                                    totalPayout += getPayout(evaluateHand([remainingDeck[i], remainingDeck[j], remainingDeck[k], remainingDeck[l], remainingDeck[m]]), 5);
+                                    totalCombos++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             return totalPayout / totalCombos;
+        }
+
+        // Count each possible final hand for a chosen hold, including a zero-card draw.
+        function getHoldDistribution(currentHand, heldIdx) {
+            const remaining = [];
+            for (const suit of SUITS) for (const rank of RANKS) {
+                if (!currentHand.some(card => card.rank === rank && card.suit === suit)) remaining.push({ rank, suit });
+            }
+            const finalHand = heldIdx.map(i => currentHand[i]);
+            const counts = Object.fromEntries(Object.keys(HAND_NAMES).map(name => [name, 0]));
+            const drawCount = 5 - heldIdx.length;
+            let total = 0;
+            function enumerate(start, left) {
+                if (left === 0) {
+                    counts[evaluateHand(finalHand)]++;
+                    total++;
+                    return;
+                }
+                for (let i = start; i <= remaining.length - left; i++) {
+                    finalHand.push(remaining[i]);
+                    enumerate(i + 1, left - 1);
+                    finalHand.pop();
+                }
+            }
+            enumerate(0, drawCount);
+            return { counts, total };
         }
 
         function renderPaytable() {
@@ -1753,6 +1838,118 @@
             }
         }
 
+        // --- Photo recognition: only the card reading is delegated; strategy stays local. ---
+        function cancelPhotoRequest() {
+            photoRevision++;
+            photoRequest = null;
+            document.getElementById('photo-read-btn').disabled = !photoData;
+        }
+
+        async function selectHandPhoto(event) {
+            cancelPhotoRequest();
+            const revision = photoRevision;
+            photoData = null;
+            const preview = document.getElementById('photo-preview');
+            const status = document.getElementById('photo-status');
+            const button = document.getElementById('photo-read-btn');
+            preview.hidden = true;
+            preview.removeAttribute('src');
+            button.disabled = true;
+            status.textContent = '';
+            const file = event.target.files[0];
+            if (!file) return;
+            manualHand = [];
+            manualRevision++;
+            document.getElementById('manual-result-panel').style.display = 'none';
+            updateManualUI();
+            if (!file.type.startsWith('image/') || file.size > 12 * 1024 * 1024) {
+                status.textContent = 'Choose an image under 12 MB.';
+                return;
+            }
+            try {
+                const data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Could not read the image.'));
+                    reader.readAsDataURL(file);
+                });
+                const image = await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('This image format could not be opened.'));
+                    img.src = data;
+                });
+                if (revision !== photoRevision) return;
+                const scale = Math.min(1, 1600 / Math.max(image.width, image.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(image.width * scale));
+                canvas.height = Math.max(1, Math.round(image.height * scale));
+                const context = canvas.getContext('2d');
+                context.fillStyle = '#fff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                photoData = canvas.toDataURL('image/jpeg', 0.9);
+                preview.src = photoData;
+                preview.hidden = false;
+                button.disabled = false;
+                status.textContent = 'Photo ready. Select Read cards to scan it on your device.';
+            } catch (error) {
+                if (revision === photoRevision) status.textContent = error.message || 'Could not open this image.';
+            }
+        }
+
+        async function readHandPhoto() {
+            if (!photoData || photoRequest) return;
+            const status = document.getElementById('photo-status');
+            const revision = ++photoRevision;
+            const handRevision = manualRevision;
+            photoRequest = true;
+            document.getElementById('photo-read-btn').disabled = true;
+            status.textContent = 'Loading the free local model and reading cards. This may take a moment…';
+            try {
+                // Let the status paint before starting inference.
+                await new Promise(resolve => setTimeout(resolve, 50));
+                const image = document.getElementById('photo-preview');
+                const cards = await CardDetector.detect(image);
+                if (revision !== photoRevision || handRevision !== manualRevision) return;
+                if (cards.length !== 5) throw new Error(`Found ${cards.length} cards, not five. Try a clear, tightly cropped photo or select the cards manually below.`);
+                if (new Set(cards.map(card => card.rank + card.suit)).size !== 5) throw new Error('Some detected cards are duplicates. Try a clearer photo or select the cards manually below.');
+                manualHand = cards.map(({ rank, suit, color }) => ({ rank, suit, color }));
+                manualRevision++;
+                document.getElementById('manual-result-panel').style.display = 'none';
+                updateManualUI();
+                status.textContent = 'Cards read. Verify every rank and suit below, correct any mistakes, then select Analyze Hand.';
+            } catch (error) {
+                if (revision === photoRevision) status.textContent = error.message || 'Could not read this photo. Try again or select cards manually.';
+            } finally {
+                if (revision === photoRevision) {
+                    photoRequest = null;
+                    document.getElementById('photo-read-btn').disabled = !photoData;
+                }
+            }
+        }
+
+        // Count completed photo/manual solver analyses, not photo reads or trainer hands.
+        function initAnalysisCounter() {
+            try {
+                const saved = window.localStorage.getItem(ANALYSIS_COUNT_KEY);
+                const value = Number(saved);
+                if (saved !== null && Number.isSafeInteger(value) && value >= 0) roundsAnalyzed = value;
+            } catch (error) { /* Storage can be unavailable in private browsing. */ }
+            renderAnalysisCounter();
+        }
+
+        function renderAnalysisCounter() {
+            document.getElementById('rounds-analyzed').textContent = roundsAnalyzed.toLocaleString();
+        }
+
+        function countCompletedAnalysis() {
+            if (roundsAnalyzed < Number.MAX_SAFE_INTEGER) roundsAnalyzed++;
+            try { window.localStorage.setItem(ANALYSIS_COUNT_KEY, String(roundsAnalyzed)); }
+            catch (error) { /* Keep counting for this session if storage is blocked. */ }
+            renderAnalysisCounter();
+        }
+
         // --- 4. MANUAL SOLVER UI ---
         function updateManualUI() {
             const slots = document.getElementById('manual-slots').children;
@@ -1786,7 +1983,7 @@
                 }
             });
 
-            document.getElementById('manual-solve-btn').disabled = manualHand.length !== 5;
+            document.getElementById('manual-solve-btn').disabled = manualHand.length !== 5 || manualSolvePending;
         }
 
         function renderSelectorGrid() {
@@ -1807,6 +2004,10 @@
         }
 
         function toggleManualCard(rank, suit) {
+            cancelPhotoRequest();
+            document.getElementById('photo-status').textContent = '';
+            manualRevision++;
+            document.getElementById('manual-result-panel').style.display = 'none';
             const index = manualHand.findIndex(c => c.rank === rank && c.suit === suit);
             if (index > -1) {
                 manualHand.splice(index, 1);
@@ -1818,41 +2019,67 @@
         }
 
         function solveManualHand() {
+            if (manualHand.length !== 5 || manualSolvePending) return;
+            manualSolvePending = true;
+            updateManualUI();
+            const snapshot = manualHand.map(card => ({ ...card }));
+            const revision = manualRevision;
             const content = document.getElementById('manual-result-content');
             document.getElementById('manual-result-panel').style.display = 'block';
             content.innerHTML = "🧞 Genie is calculating all 32 outcomes...";
             
             setTimeout(() => {
-                const results = solveHand(manualHand);
-                const best = results[0];
+                try {
+                    if (revision !== manualRevision) return;
+                    const results = solveHand(snapshot);
+                    const best = results[0];
                 
-                let html = `
-                    <div style="margin-bottom:20px;">
-                        <h4 style="color:var(--primary); margin-bottom:10px;">Optimal Hold:</h4>
-                        <div style="font-size:1.3rem; font-family:'JetBrains Mono'; color:#fff; font-weight:700;">
-                            ${best.indices.length === 0 ? "DISCARD ALL" : best.indices.map(i => manualHand[i].rank + manualHand[i].suit).join(' ')}
+                    const distribution = getHoldDistribution(snapshot, best.indices);
+                    const cardNames = indices => indices.map(i => snapshot[i].rank + snapshot[i].suit).join(' ') || 'NONE';
+                    const returnPct = ev => (ev / 5 * 100).toFixed(2) + '%';
+                    const winningCount = distribution.total - distribution.counts.NOTHING;
+                    let html = `
+                        <div style="margin-bottom:20px;">
+                            <h4 style="color:var(--primary); margin-bottom:10px;">Optimal Hold</h4>
+                            <div style="font-size:1.3rem; font-family:'JetBrains Mono'; color:#fff; font-weight:700;">${cardNames(best.indices)}</div>
+                            <div style="margin-top:10px; color:var(--secondary); font-weight:600;">Draw: ${snapshot.filter((card, i) => !best.indices.includes(i)).map(card => card.rank + card.suit).join(' ') || 'NONE (stand pat)'}</div>
+                            <p style="color:var(--text-muted); margin-top:10px;">Full-pay 9/6 Jacks or Better, five coins. EV is an average, not a guaranteed payout.</p>
                         </div>
-                        <div style="color:var(--success); margin-top:5px; font-weight:600;">Expected Value: ${best.ev.toFixed(4)} credits</div>
-                    </div>
-                    <h4 style="color:var(--text-muted); margin-bottom:10px;">Top Alternative Holds:</h4>
-                    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-                `;
-                
-                results.slice(1, 6).forEach(res => {
-                    html += `
-                        <tr style="border-bottom:1px solid var(--border)">
-                            <td style="padding:8px 0; font-family:'JetBrains Mono';">${res.indices.map(i => manualHand[i].rank + manualHand[i].suit).join(' ') || 'NONE'}</td>
-                            <td style="padding:8px 0; text-align:right; color:var(--text-muted)">EV: ${res.ev.toFixed(4)}</td>
-                        </tr>
+                        <h4 style="color:var(--primary); margin-bottom:8px;">Best plays & expected value</h4>
+                        <div class="analysis-scroll"><table class="analysis-table">
+                            <thead><tr><th>Hold</th><th>Gross payout<br>(5 credits)</th><th>Net EV<br>(after bet)</th><th>Return<br>(per credit)</th></tr></thead><tbody>
                     `;
-                });
-                
-                html += `</table>`;
-                content.innerHTML = html;
+                    results.slice(0, 6).forEach((res, index) => {
+                        html += `<tr><td>${index === 0 ? '<strong>Best: ' + cardNames(res.indices) + '</strong>' : cardNames(res.indices)}</td>
+                            <td>${res.ev.toFixed(4)}</td><td>${(res.ev - 5).toFixed(4)}</td><td>${returnPct(res.ev)}</td></tr>`;
+                    });
+                    html += `</tbody></table></div>
+                        <h4 style="color:var(--primary); margin-bottom:8px;">Possible outcomes for the best hold</h4>
+                        <p style="color:var(--text-muted); margin-bottom:10px;">${distribution.total.toLocaleString()} possible draws · Any paying hand: ${(winningCount / distribution.total * 100).toFixed(4)}%</p>
+                        <div class="analysis-scroll"><table class="analysis-table">
+                            <thead><tr><th>Final hand</th><th>Pay (credits)</th><th>Probability</th><th>1 in</th></tr></thead><tbody>`;
+                    Object.keys(HAND_NAMES).forEach(type => {
+                        const count = distribution.counts[type];
+                        const probability = count / distribution.total;
+                        html += `<tr><td>${HAND_NAMES[type]}</td><td>${getPayout(type, 5)}</td><td>${(probability * 100).toFixed(4)}%</td><td>${count ? (distribution.total / count).toFixed(2) : '—'}</td></tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                    content.innerHTML = html;
+                    countCompletedAnalysis();
+                } catch (error) {
+                    content.textContent = 'Unable to analyze this hand. Please try again.';
+                    console.error(error);
+                } finally {
+                    manualSolvePending = false;
+                    updateManualUI();
+                }
             }, 50);
         }
 
         function resetManualSolver() {
+            cancelPhotoRequest();
+            document.getElementById('photo-status').textContent = '';
+            manualRevision++;
             manualHand = [];
             document.getElementById('manual-result-panel').style.display = 'none';
             updateManualUI();

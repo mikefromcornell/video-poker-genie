@@ -5,7 +5,7 @@ The ultimate Video Poker trainer, solver, and variance engine powered by mathema
 ## Core Features
 - **Real-time Solver & Trainer:** Uses Exhaustive Expectation Evaluation to calculate the Expected Value (EV) of all 32 possible hold combinations for any dealt hand.
 - **Strategy Accuracy Tracker:** Measures how often your decisions align with mathematically optimal play (99.54% return).
-- **Manual Hand Solver:** Pick any 5 cards from the deck to analyze optimal holds and alternative strategies.
+- **Photo & Hand Solver:** Upload a photo to read a dealt hand, verify or correct the detected cards, and calculate the optimal hold, draw, and alternative holds. You can also select all five cards manually.
 - **Variance & Return Distribution Visualizer:**
   - High-speed Monte Carlo simulation (5,000+ paths) modeling ending bankroll and return distributions.
   - Interactive probability density chart with customizable starting bankroll, coin denomination ($0.05 to $100), bet coins (1-5), and session length (hands/hours).
@@ -20,6 +20,38 @@ The ultimate Video Poker trainer, solver, and variance engine powered by mathema
   - Universal Multi-Denomination Bankroll Reference Matrix.
 - **Paytable & Mathematical Guides:** Learn the mathematics of video poker, Gambler's Ruin, and bankroll principles.
 
+## Photo recognition
+
+The app opens on **Photo & Hand Solver**. Take a photo on a supported mobile device or choose a clear, tightly cropped photo of five upright, separated cards, and select **Read cards**. Verify every rank and suit using the card selector before selecting **Analyze Hand**. The solver uses the full-pay 9/6 Jacks or Better paytable with a five-coin bet; other games and paytables may require different holds. The recommendation maximizes expected payout, not the probability of winning any particular hand.
+
+Recognition is free, requires no API key, and runs in your browser; the photo is not uploaded. The local model and runtime are downloaded from the site on first use (about 23 MB). Recognition is trained on standard playing cards and may struggle with video poker screen graphics, unusual designs, glare, overlapping cards or small images. Always check the results, or use the manual selector if the photo cannot be read.
+
+For local use, serve the directory over HTTP (for example `python3 -m http.server 8000`) and visit `http://localhost:8000`; loading model and WebAssembly files directly via `file://` is not reliably supported. GitHub Pages serves them automatically.
+
+The results include gross expected payout per five-credit bet, net EV (gross minus five credits), return as a percentage of the bet, and the final-hand probability distribution for the best hold. A gross return over 100% on a particular dealt hand does not mean the overall game is profitable.
+
+Run checks with `node tests/photo-solver.test.js`, `node tests/model-smoke.test.js`, and `node tests/strategy-comparison.test.js`.
+
+### Strategy comparison
+
+These six examples compare Genie's best hold against [Beating Bonuses' published 9/6 Jacks or Better strategy chart](https://www.beatingbonuses.com/job.htm). All six holds agreed with the chart. EVs below were computed by Genie as **gross credits for a five-credit bet**, not read from the Beating Bonuses calculator.
+
+| Dealt hand | Hold | Genie gross EV |
+| --- | --- | ---: |
+| 10♥ J♥ Q♥ K♥ 2♣ | 10♥ J♥ Q♥ K♥ | 98.4043 |
+| A♥ A♦ K♣ 7♦ 3♠ | A♥ A♦ | 7.6827 |
+| 2♥ 2♦ 9♣ 6♠ 4♥ | 2♥ 2♦ | 4.1184 |
+| 9♥ 9♣ 5♦ 5♠ A♥ | 9♥ 9♣ 5♦ 5♠ | 12.9787 |
+| 5♣ 6♣ 7♣ 8♣ A♠ | 5♣ 6♣ 7♣ 8♣ | 17.6596 |
+| 10♥ J♥ Q♥ K♥ A♥ | 10♥ J♥ Q♥ K♥ A♥ | 4000.0000 |
+
+The automated test compares the displayed rules in that chart, not live results from the site's interactive calculator, and is not a full validation of every hand. To check exact values there, choose Jacks or Better, full-pay 9/6, no extra coin feature, and five-coin payouts. These examples do not measure the accuracy of photo recognition.
+
+### Third-party recognition components
+
+- `assets/playing-cards.onnx` is an ONNX export of the YOLOv8 card model from [MustafaKemal0146/kart-tanima](https://github.com/MustafaKemal0146/kart-tanima), distributed there under the MIT license (see `assets/MODEL-LICENSE.txt`). It was exported at 640×640, opset 17, using Ultralytics 8.4.211. The upstream model was trained using a Roboflow playing-cards dataset and Ultralytics YOLOv8; those components may have separate terms.
+- `assets/ort/` contains ONNX Runtime Web 1.22.0 (MIT; see `assets/ort/LICENSE`).
+
 ## Mathematical Engine
 - **Full Pay 9/6 Jacks or Better:** Theoretical return of **99.5439%** with 5 coins max bet; per-hand variance $\sigma^2 \approx 19.5157$ ($\sigma \approx 4.4177$).
 - **Base Game (Without Royal):** Base return **97.5631%**; base variance $\sigma^2 \approx 3.7084$ ($\sigma \approx 1.9257$).
@@ -28,5 +60,5 @@ The ultimate Video Poker trainer, solver, and variance engine powered by mathema
 
 ## Publishing & Deployment
 - Pure HTML5, CSS3, and modern vanilla JavaScript.
-- 100% self-contained with no external dependencies or build steps.
+- No build step required; photo recognition and solving run locally in the browser.
 - Designed for responsive mobile and desktop viewing and published via GitHub Pages.
