@@ -22,13 +22,30 @@ The ultimate Video Poker trainer, solver, and variance engine powered by mathema
 
 ## Photo recognition
 
-Open **Photo & Hand Solver**, choose a clear, tightly cropped photo of five upright, separated cards, and select **Read cards**. Verify every rank and suit using the card selector before selecting **Analyze Hand**. The solver uses the full-pay 9/6 Jacks or Better paytable with a five-coin bet; other games and paytables may require different holds. The recommendation maximizes expected payout, not the probability of winning any particular hand.
+The app opens on **Photo & Hand Solver**. Take a photo on a supported mobile device or choose a clear, tightly cropped photo of five upright, separated cards, and select **Read cards**. Verify every rank and suit using the card selector before selecting **Analyze Hand**. The solver uses the full-pay 9/6 Jacks or Better paytable with a five-coin bet; other games and paytables may require different holds. The recommendation maximizes expected payout, not the probability of winning any particular hand.
 
 Recognition is free, requires no API key, and runs in your browser; the photo is not uploaded. The local model and runtime are downloaded from the site on first use (about 23 MB). Recognition is trained on standard playing cards and may struggle with video poker screen graphics, unusual designs, glare, overlapping cards or small images. Always check the results, or use the manual selector if the photo cannot be read.
 
 For local use, serve the directory over HTTP (for example `python3 -m http.server 8000`) and visit `http://localhost:8000`; loading model and WebAssembly files directly via `file://` is not reliably supported. GitHub Pages serves them automatically.
 
-Run checks with `node tests/photo-solver.test.js` and `node tests/model-smoke.test.js`.
+The results include gross expected payout per five-credit bet, net EV (gross minus five credits), return as a percentage of the bet, and the final-hand probability distribution for the best hold. A gross return over 100% on a particular dealt hand does not mean the overall game is profitable.
+
+Run checks with `node tests/photo-solver.test.js`, `node tests/model-smoke.test.js`, and `node tests/strategy-comparison.test.js`.
+
+### Strategy comparison
+
+These six examples compare Genie's best hold against [Beating Bonuses' published 9/6 Jacks or Better strategy chart](https://www.beatingbonuses.com/job.htm). All six holds agreed with the chart. EVs below were computed by Genie as **gross credits for a five-credit bet**, not read from the Beating Bonuses calculator.
+
+| Dealt hand | Hold | Genie gross EV |
+| --- | --- | ---: |
+| 10♥ J♥ Q♥ K♥ 2♣ | 10♥ J♥ Q♥ K♥ | 98.4043 |
+| A♥ A♦ K♣ 7♦ 3♠ | A♥ A♦ | 7.6827 |
+| 2♥ 2♦ 9♣ 6♠ 4♥ | 2♥ 2♦ | 4.1184 |
+| 9♥ 9♣ 5♦ 5♠ A♥ | 9♥ 9♣ 5♦ 5♠ | 12.9787 |
+| 5♣ 6♣ 7♣ 8♣ A♠ | 5♣ 6♣ 7♣ 8♣ | 17.6596 |
+| 10♥ J♥ Q♥ K♥ A♥ | 10♥ J♥ Q♥ K♥ A♥ | 4000.0000 |
+
+The automated test compares the displayed rules in that chart, not live results from the site's interactive calculator, and is not a full validation of every hand. To check exact values there, choose Jacks or Better, full-pay 9/6, no extra coin feature, and five-coin payouts. These examples do not measure the accuracy of photo recognition.
 
 ### Third-party recognition components
 
