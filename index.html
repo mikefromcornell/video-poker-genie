@@ -284,7 +284,10 @@
 
         /* Photo hand input */
         .solver-board { padding: 16px; }
-        .solver-title { color: var(--primary); font-size: 1.15rem; margin-bottom: 10px; }
+        .solver-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .solver-title { color: var(--primary); font-size: 1.15rem; }
+        .compare-shortcut { border: 1px solid var(--border-highlight); background: var(--surface-elevated); color: var(--secondary); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+        .compare-shortcut:hover, .compare-shortcut:focus-visible { border-color: var(--secondary); outline-color: var(--secondary); }
         .photo-input-panel { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 12px; }
         .photo-choices { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .photo-file-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -315,6 +318,18 @@
         .analysis-counter { border-top: 1px solid var(--border); margin-top: 30px; padding-top: 18px; text-align: center; color: var(--text-muted); }
         .analysis-counter strong { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; }
         .analysis-counter p { font-size: 0.8rem; margin-top: 4px; }
+        .compare-controls { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+        .compare-controls .input-group { flex: 1 1 220px; }
+        .compare-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.9rem; margin: 14px 0; }
+        .compare-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+        .compare-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .compare-chart { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-width: 0; }
+        .compare-chart h3 { font-size: 1rem; color: var(--text-bright); }
+        .compare-chart canvas { display: block; width: 100%; height: 230px; }
+        .compare-chart p { font-size: 0.75rem; color: var(--text-muted); }
+        .compare-note { color: var(--text-muted); font-size: 0.85rem; margin-top: 14px; }
+        #compare-error { color: var(--danger); }
+        @media (max-width: 700px) { .compare-charts { grid-template-columns: 1fr; } }
         .photo-preview { display: block; max-width: 100%; max-height: 100px; border-radius: 8px; margin: 10px 0 0; }
         .photo-preview[hidden] { display: none; }
         .photo-status { margin-top: 8px; color: var(--text); font-size: 0.9rem; }
@@ -800,7 +815,8 @@
     <div class="container workspace">
         
         <nav class="tabs">
-            <div class="tab active" onclick="switchTab('solver')">📷 Photo & Hand Solver</div>
+            <div class="tab active" onclick="switchTab('solver')">📷 Analyzer</div>
+            <button type="button" class="tab" onclick="switchTab('compare')">📈 1 vs 5 Graph</button>
             <div class="tab" onclick="switchTab('play')">🎮 Trainer</div>
             <div class="tab" onclick="switchTab('variance')">📊 Variance & Returns</div>
             <div class="tab" onclick="switchTab('optimal-bankroll')">🎯 Optimal Bankroll & EV</div>
@@ -843,6 +859,45 @@
                 <div class="stat-card">
                     <div class="stat-value" id="stat-winloss">0</div>
                     <div class="stat-label">Session Profit</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- One-credit versus five-credit short-session distribution -->
+        <div id="tab-compare" class="tab-content">
+            <div class="game-board">
+                <h2 style="color: var(--primary); margin-bottom: 6px;">1 vs 5 Credits: Session Outcomes</h2>
+                <p style="color:var(--text-muted);">Compare net profit or loss after 20, 50, 100, and 150 rounds of 9/6 Jacks or Better. Lines show probability per dollar-range bin, not a normal bell-curve estimate.</p>
+                <div class="compare-controls">
+                    <div class="input-group">
+                        <label class="input-label" for="compare-stake">One-credit denomination ($)</label>
+                        <input class="form-control" id="compare-stake" type="number" value="0.25" min="0.01" max="1000" step="0.01" oninput="CreditComparison.update()">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="compare-mode">Comparison</label>
+                        <select class="form-control" id="compare-mode" onchange="CreditComparison.update()">
+                            <option value="equal">Same total bet per round</option>
+                            <option value="denom">Same credit denomination</option>
+                        </select>
+                    </div>
+                </div>
+                <p id="compare-error" role="status" aria-live="polite"></p>
+                <div id="compare-results" hidden>
+                    <p id="compare-bets" style="font-weight:600;"></p>
+                    <div class="compare-legend"><span><i class="compare-dot" style="background:#38bdf8;"></i>1 credit (dashed)</span><span><i class="compare-dot" style="background:#fbbf24;"></i>5 credits</span></div>
+                    <div class="compare-charts">
+                        <div class="compare-chart"><h3>20 rounds</h3><canvas id="compare-chart-20" aria-label="20-round profit and loss distribution"></canvas><p id="compare-tail-20"></p></div>
+                        <div class="compare-chart"><h3>50 rounds</h3><canvas id="compare-chart-50" aria-label="50-round profit and loss distribution"></canvas><p id="compare-tail-50"></p></div>
+                        <div class="compare-chart"><h3>100 rounds</h3><canvas id="compare-chart-100" aria-label="100-round profit and loss distribution"></canvas><p id="compare-tail-100"></p></div>
+                        <div class="compare-chart"><h3>150 rounds</h3><canvas id="compare-chart-150" aria-label="150-round profit and loss distribution"></canvas><p id="compare-tail-150"></p></div>
+                    </div>
+                    <p class="compare-note">Each graph focuses on the central outcomes; the reported outside-chart percentage includes rare jackpots and other tails. The vertical dashed line is break-even. Curves join discrete probability bins, not individual continuous outcomes. At equal wagers the ordinary outcomes are similar, but the five-credit royal jackpot is much larger and usually outside the visible range.</p>
+                    <h3 style="color:var(--primary); margin: 22px 0 8px;">Outcome summary</h3>
+                    <div class="analysis-scroll"><table class="analysis-table">
+                        <thead><tr><th>Rounds</th><th>Bet</th><th>Expected net</th><th>Loss</th><th>Break even</th><th>Profit</th><th>Central 95% range</th><th>At least one royal</th></tr></thead>
+                        <tbody id="compare-table-body"></tbody>
+                    </table></div>
+                    <p class="compare-note">Ranges are discrete 2.5th–97.5th percentiles, not a guarantee. Optimized holds are modeled separately for the one- and five-credit paytables (98.37% and 99.54% long-run returns). Rounds are independent; the model assumes you can complete every round and does not stop for bankruptcy. Actual machine paytables and play may differ.</p>
                 </div>
             </div>
         </div>
@@ -904,7 +959,7 @@
                             <option value="1">1 Coin (98.18% EV)</option>
                         </select>
                         <div style="font-size:0.75rem; color:var(--secondary); margin-top:4px;">
-                            ⭐ 5 coins enables 800:1 Royal payout
+                            ⭐ 5 coins enables 800:1 Royal payout. This older simulator uses the five-credit strategy for all bet sizes; see 1 vs 5 Credits for separately optimized strategies.
                         </div>
                     </div>
 
@@ -1290,7 +1345,10 @@
         <!-- Photo and hand solver -->
         <div id="tab-solver" class="tab-content active">
             <div class="game-board solver-board">
-                <h2 class="solver-title">Photo & Hand Solver</h2>
+                <div class="solver-heading">
+                    <h2 class="solver-title">Photo & Hand Solver</h2>
+                    <button type="button" class="compare-shortcut" onclick="switchTab('compare')">📈 View outcome graphs</button>
+                </div>
                 <section class="photo-input-panel" aria-label="Read cards from a photo">
                     <div class="photo-choices">
                         <input class="photo-file-input" id="photo-camera" type="file" accept="image/*" capture="environment" onchange="selectHandPhoto(event)">
@@ -1387,6 +1445,7 @@
 
     <script src="assets/ort/ort.wasm.min.js"></script>
     <script src="assets/card-detector.js"></script>
+    <script src="assets/credit-comparison.js"></script>
     <script>
         // --- 1. CORE VIDEO POKER CONFIG & EXACT CONSTANTS ---
         const SUITS = ['♠', '♣', '♥', '♦'];
@@ -3526,6 +3585,7 @@
         }
 
         function handleWindowResize() {
+            if (document.getElementById('tab-compare').classList.contains('active')) CreditComparison.update();
             renderDistributionChart();
             renderTrajectoryChart();
             if (varSimResults) {
@@ -3549,7 +3609,9 @@
             const targetContent = document.getElementById(`tab-${tabId}`);
             if (targetContent) targetContent.classList.add('active');
 
-            if (tabId === 'variance') {
+            if (tabId === 'compare') {
+                CreditComparison.update();
+            } else if (tabId === 'variance') {
                 setTimeout(() => {
                     renderDistributionChart();
                     renderTrajectoryChart();
