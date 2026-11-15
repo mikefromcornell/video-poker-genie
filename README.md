@@ -6,6 +6,7 @@ The ultimate Video Poker trainer, solver, and variance engine powered by mathema
 - **Real-time Solver & Trainer:** Uses Exhaustive Expectation Evaluation to calculate the Expected Value (EV) of all 32 possible hold combinations for any dealt hand.
 - **Strategy Accuracy Tracker:** Measures how often your decisions align with mathematically optimal play (99.54% return).
 - **Photo & Hand Solver:** Upload a photo to read a dealt hand, verify or correct the detected cards, and calculate the optimal hold, draw, and alternative holds. You can also select all five cards manually.
+- **1 vs 5 Credits:** Compare short-session outcome distributions for 20, 50, 100 and 150 rounds, using either equal total bets or the same credit denomination.
 - **Variance & Return Distribution Visualizer:**
   - High-speed Monte Carlo simulation (5,000+ paths) modeling ending bankroll and return distributions.
   - Interactive probability density chart with customizable starting bankroll, coin denomination ($0.05 to $100), bet coins (1-5), and session length (hands/hours).
@@ -30,7 +31,7 @@ For local use, serve the directory over HTTP (for example `python3 -m http.serve
 
 The results include gross expected payout per five-credit bet, net EV (gross minus five credits), return as a percentage of the bet, and the final-hand probability distribution for the best hold. A gross return over 100% on a particular dealt hand does not mean the overall game is profitable.
 
-Run checks with `node tests/photo-solver.test.js`, `node tests/model-smoke.test.js`, and `node tests/strategy-comparison.test.js`.
+Run checks with `node tests/photo-solver.test.js`, `node tests/model-smoke.test.js`, `node tests/strategy-comparison.test.js`, and `node tests/credit-comparison.test.js`.
 
 ### Strategy comparison
 
@@ -51,6 +52,14 @@ The automated test compares the displayed rules in that chart, not live results 
 
 - `assets/playing-cards.onnx` is an ONNX export of the YOLOv8 card model from [MustafaKemal0146/kart-tanima](https://github.com/MustafaKemal0146/kart-tanima), distributed there under the MIT license (see `assets/MODEL-LICENSE.txt`). It was exported at 640×640, opset 17, using Ultralytics 8.4.211. The upstream model was trained using a Roboflow playing-cards dataset and Ultralytics YOLOv8; those components may have separate terms.
 - `assets/ort/` contains ONNX Runtime Web 1.22.0 (MIT; see `assets/ort/LICENSE`).
+
+## One-credit vs five-credit distributions
+
+The **1 vs 5 Credits** tab compares exact discrete session distributions for full-pay 9/6 Jacks or Better. It defaults to a $0.25 total bet for each option (one quarter versus five nickels); select the same denomination to compare a $0.25 bet against a $1.25 bet instead. Results assume independent hands, separate optimal strategies for the one- and five-credit paytables, and enough funds to complete every round. They do not model busting, jackpots beyond the specified paytable, or suboptimal decisions.
+
+The graph joins probability bins, focuses on the central outcomes, and reports the probability outside the plotted range. The summary shows loss, break-even and profit probabilities, gross-payout-derived expected net, and the discrete 2.5th–97.5th percentile interval. At equal total bets, ordinary payouts are similar and the rare five-credit royal bonus is usually outside the plotted range; do not interpret the overlap as equal long-run EV.
+
+The per-hand outcome probabilities were computed by exhaustive enumeration of suit-equivalent deals with the inclusion–exclusion method described in [this video poker analysis](https://github.com/gomyway1216/nextjs-portfolio/pull/809). The calculated returns are 98.3735% and 99.5439%, respectively; the one-credit result and variance agree with [this independent reference](https://wizardofvegas.com/forum/gambling/video-poker/898-optimum-strategy-for-1-coin-jb/). Equal-EV strategy ties use the hold with more cards. Session probabilities are calculated by convolving the per-hand distribution, with positive-tail overflow tracked separately rather than assumed to be normal.
 
 ## Mathematical Engine
 - **Full Pay 9/6 Jacks or Better:** Theoretical return of **99.5439%** with 5 coins max bet; per-hand variance $\sigma^2 \approx 19.5157$ ($\sigma \approx 4.4177$).
