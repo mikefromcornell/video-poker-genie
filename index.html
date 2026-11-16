@@ -322,14 +322,12 @@
         .compare-controls .input-group { flex: 1 1 220px; }
         .compare-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.9rem; margin: 14px 0; }
         .compare-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
-        .compare-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
         .compare-chart { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-width: 0; }
         .compare-chart h3 { font-size: 1rem; color: var(--text-bright); }
-        .compare-chart canvas { display: block; width: 100%; height: 230px; }
+        .compare-chart canvas { display: block; width: 100%; height: 300px; }
         .compare-chart p { font-size: 0.75rem; color: var(--text-muted); }
         .compare-note { color: var(--text-muted); font-size: 0.85rem; margin-top: 14px; }
         #compare-error { color: var(--danger); }
-        @media (max-width: 700px) { .compare-charts { grid-template-columns: 1fr; } }
         .photo-preview { display: block; max-width: 100%; max-height: 100px; border-radius: 8px; margin: 10px 0 0; }
         .photo-preview[hidden] { display: none; }
         .photo-status { margin-top: 8px; color: var(--text); font-size: 0.9rem; }
@@ -816,7 +814,7 @@
         
         <nav class="tabs">
             <div class="tab active" onclick="switchTab('solver')">📷 Analyzer</div>
-            <button type="button" class="tab" onclick="switchTab('compare')">📈 1 vs 5 Graph</button>
+            <button type="button" class="tab" onclick="switchTab('compare')">📈 Bet Comparison</button>
             <div class="tab" onclick="switchTab('play')">🎮 Trainer</div>
             <div class="tab" onclick="switchTab('variance')">📊 Variance & Returns</div>
             <div class="tab" onclick="switchTab('optimal-bankroll')">🎯 Optimal Bankroll & EV</div>
@@ -863,41 +861,36 @@
             </div>
         </div>
 
-        <!-- One-credit versus five-credit short-session distribution -->
+        <!-- Fixed-budget comparison at a quarter denomination -->
         <div id="tab-compare" class="tab-content">
             <div class="game-board">
-                <h2 style="color: var(--primary); margin-bottom: 6px;">1 vs 5 Credits: Session Outcomes</h2>
-                <p style="color:var(--text-muted);">Compare net profit or loss after 20, 50, 100, and 150 rounds of 9/6 Jacks or Better. Lines show probability per dollar-range bin, not a normal bell-curve estimate.</p>
+                <h2 style="color: var(--primary); margin-bottom: 6px;">Compare 1, 2 &amp; 5 Credits</h2>
+                <p style="color:var(--text-muted);">Compare ending cash at a 25¢ denomination. The starting amount is also the total wagering budget: play as many whole hands as it covers, keep winnings, and leave any unused budget in your ending cash.</p>
                 <div class="compare-controls">
                     <div class="input-group">
-                        <label class="input-label" for="compare-stake">One-credit denomination ($)</label>
-                        <input class="form-control" id="compare-stake" type="number" value="0.25" min="0.01" max="1000" step="0.01" oninput="CreditComparison.update()">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="compare-mode">Comparison</label>
-                        <select class="form-control" id="compare-mode" onchange="CreditComparison.update()">
-                            <option value="equal">Same total bet per round</option>
-                            <option value="denom">Same credit denomination</option>
-                        </select>
+                        <label class="input-label" for="compare-starting-cash">Starting cash ($)</label>
+                        <input class="form-control" id="compare-starting-cash" type="number" value="50" min="1.25" max="500" step="0.01" oninput="CreditComparison.scheduleUpdate()" aria-describedby="compare-input-help compare-error">
+                        <p id="compare-input-help" class="compare-note">$1.25–$500; fixed denomination: $0.25 per credit.</p>
                     </div>
                 </div>
                 <p id="compare-error" role="status" aria-live="polite"></p>
                 <div id="compare-results" hidden>
                     <p id="compare-bets" style="font-weight:600;"></p>
-                    <div class="compare-legend"><span><i class="compare-dot" style="background:#38bdf8;"></i>1 credit (dashed)</span><span><i class="compare-dot" style="background:#fbbf24;"></i>5 credits</span></div>
-                    <div class="compare-charts">
-                        <div class="compare-chart"><h3>20 rounds</h3><canvas id="compare-chart-20" aria-label="20-round profit and loss distribution"></canvas><p id="compare-tail-20"></p></div>
-                        <div class="compare-chart"><h3>50 rounds</h3><canvas id="compare-chart-50" aria-label="50-round profit and loss distribution"></canvas><p id="compare-tail-50"></p></div>
-                        <div class="compare-chart"><h3>100 rounds</h3><canvas id="compare-chart-100" aria-label="100-round profit and loss distribution"></canvas><p id="compare-tail-100"></p></div>
-                        <div class="compare-chart"><h3>150 rounds</h3><canvas id="compare-chart-150" aria-label="150-round profit and loss distribution"></canvas><p id="compare-tail-150"></p></div>
-                    </div>
-                    <p class="compare-note">Each graph focuses on the central outcomes; the reported outside-chart percentage includes rare jackpots and other tails. The vertical dashed line is break-even. Curves join discrete probability bins, not individual continuous outcomes. At equal wagers the ordinary outcomes are similar, but the five-credit royal jackpot is much larger and usually outside the visible range.</p>
+                    <div class="compare-legend"><span><i class="compare-dot" style="background:#38bdf8;"></i>1 credit (dashed)</span><span><i class="compare-dot" style="background:#c084fc;"></i>2 credits (dotted)</span><span><i class="compare-dot" style="background:#fbbf24;"></i>5 credits</span></div>
+                    <div class="compare-chart"><h3>Ending cash distribution</h3><canvas id="compare-chart" aria-label="Distribution of ending cash for one, two, and five credits"></canvas><p id="compare-tail"></p></div>
+                    <p class="compare-note">Lines join discrete probability bins; the dashed vertical line is your starting cash. The graph focuses on typical outcomes. The outside-chart percentages include rare large wins such as a royal flush.</p>
                     <h3 style="color:var(--primary); margin: 22px 0 8px;">Outcome summary</h3>
                     <div class="analysis-scroll"><table class="analysis-table">
-                        <thead><tr><th>Rounds</th><th>Bet</th><th>Expected net</th><th>Loss</th><th>Break even</th><th>Profit</th><th>Central 95% range</th><th>At least one royal</th></tr></thead>
+                        <thead><tr><th>Credits</th><th>Bet / hand</th><th>Hands</th><th>Total wagered</th><th>Expected ending cash</th><th>Expected net</th><th>Profit chance</th><th>Central 95% ending cash</th></tr></thead>
                         <tbody id="compare-table-body"></tbody>
                     </table></div>
-                    <p class="compare-note">Ranges are discrete 2.5th–97.5th percentiles, not a guarantee. Optimized holds are modeled separately for the one- and five-credit paytables (98.37% and 99.54% long-run returns). Rounds are independent; the model assumes you can complete every round and does not stop for bankruptcy. Actual machine paytables and play may differ.</p>
+                    <h3 style="color:var(--primary); margin: 22px 0 8px;">Chance of exceeding starting-cash thresholds</h3>
+                    <p class="compare-note" style="margin:0 0 8px;">Strictly above the amount shown; at 100%, a break-even result does not count as profit.</p>
+                    <div class="analysis-scroll"><table class="analysis-table">
+                        <thead><tr><th>Threshold</th><th>Ending cash</th><th>1 credit</th><th>2 credits</th><th>5 credits</th></tr></thead>
+                        <tbody id="compare-threshold-body"></tbody>
+                    </table></div>
+                    <p class="compare-note">The ranges are discrete 2.5th–97.5th percentiles, not guarantees. This assumes full-pay 9/6 Jacks or Better, independent hands and optimal holds for each paytable. One and two credits have the same proportional paytable; five credits unlocks the royal bonus. The number of hands is fixed by the wagering budget, not by playing until the bankroll is exhausted. Actual machines and play may differ.</p>
                 </div>
             </div>
         </div>
@@ -959,7 +952,7 @@
                             <option value="1">1 Coin (98.18% EV)</option>
                         </select>
                         <div style="font-size:0.75rem; color:var(--secondary); margin-top:4px;">
-                            ⭐ 5 coins enables 800:1 Royal payout. This older simulator uses the five-credit strategy for all bet sizes; see 1 vs 5 Credits for separately optimized strategies.
+                            ⭐ 5 coins enables 800:1 Royal payout. This older simulator uses the five-credit strategy for all bet sizes; see Bet Comparison for separately optimized strategies.
                         </div>
                     </div>
 
@@ -1347,7 +1340,7 @@
             <div class="game-board solver-board">
                 <div class="solver-heading">
                     <h2 class="solver-title">Photo & Hand Solver</h2>
-                    <button type="button" class="compare-shortcut" onclick="switchTab('compare')">📈 View outcome graphs</button>
+                    <button type="button" class="compare-shortcut" onclick="switchTab('compare')">📈 Compare bets</button>
                 </div>
                 <section class="photo-input-panel" aria-label="Read cards from a photo">
                     <div class="photo-choices">
